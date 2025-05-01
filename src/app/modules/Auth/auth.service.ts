@@ -79,7 +79,10 @@ const refreshToken = async (token: string) => {
   return { accessToken };
 };
 
+const changePassword = async () => {};
+
 export const AuthServices = {
   loginUser,
   refreshToken,
+  changePassword,
 };
