@@ -15,6 +15,19 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
       data: result,
     });
   });
+
+const getAllMovie = catchAsync(async (req: Request, res: Response) => {
+    
+    const result = await movieService.getAllMovie();
+  
+    sendResponse(res, {
+      statusCode: status.CREATED,
+      success: true,
+      message:  "Fetch all movie successfully",
+      data: result,
+    });
+  });
   export const movieController = {
     addAMovie,
+    getAllMovie
   };

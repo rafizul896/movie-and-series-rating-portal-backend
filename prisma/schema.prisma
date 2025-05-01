@@ -26,6 +26,7 @@ model Movie {
   synopsis       String
   genres         String[]
   releaseYear    Int
+  isDeleted   Boolean @default(false)
   director       String
   cast           String[]
   platforms      String[]

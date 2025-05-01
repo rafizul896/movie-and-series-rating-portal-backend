@@ -5,5 +5,6 @@ const movieRoutes = Router();
 
 
 movieRoutes.post("/", movieController.addAMovie)
+movieRoutes.get("/", movieController.getAllMovie)
 
 export default movieRoutes;
