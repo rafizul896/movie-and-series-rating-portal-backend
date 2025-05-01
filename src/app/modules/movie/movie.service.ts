@@ -9,31 +9,53 @@ const addAMovie = async (movieData: Movie) => {
 };
 
 const getAllMovie = async () => {
-    const result = await prisma.movie.findMany({
-        where: {
-            isDeleted: false
-        }
-    });
-    return result;
-  };
+  const result = await prisma.movie.findMany({
+    where: {
+      isDeleted: false,
+    },
+  });
+  return result;
+};
 
-const updateAMovie = async (id:string, payload:any) => {
-    const findUser = await prisma.movie.findUniqueOrThrow({
-        where: {
-            id,
-            isDeleted: false
-        }
-    })
-    const result = await prisma.movie.update({
-        where: {
-            id,
-            isDeleted: false
-        },data: payload
-    });
-    return result;
-  };
+const updateAMovie = async (id: string, payload: any) => {
+  await prisma.movie.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+  const result = await prisma.movie.update({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    data: payload,
+  });
+  return result;
+};
+
+const deleteAMovie = async (id: string) => {
+  await prisma.movie.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+  const result = await prisma.movie.update({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+  return result;
+};
 
 export const movieService = {
   addAMovie,
-  getAllMovie
+  getAllMovie,
+  updateAMovie,
+  deleteAMovie
 };

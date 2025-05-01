@@ -20,6 +20,7 @@ export const handlePrismaError = (
       }`,
     };
   } else if (err.code === "P2025") {
+    console.log("error not found", err)
     // Record not found error
     return {
       statusCode: httpStatus.NOT_FOUND,

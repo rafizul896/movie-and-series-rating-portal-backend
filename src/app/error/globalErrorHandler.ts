@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
@@ -35,7 +36,6 @@ export const globalErrorHandler: ErrorRequestHandler = (
   }
   // Handle Custom AppError
   else if (error instanceof AppError) {
-    console.log("app", error)
     statusCode = error.statusCode;
     message = error.message;
   }
