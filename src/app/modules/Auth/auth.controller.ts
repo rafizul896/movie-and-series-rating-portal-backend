@@ -1,0 +1,37 @@
+import status from 'http-status';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import { AuthServices } from './auth.service';
+
+const loginUser = catchAsync(async (req, res) => {
+  const result = await AuthServices.loginUser(req.body);
+
+  res.cookie('refreshToken', result.refreshToken, {
+    secure: false,
+    httpOnly: true,
+  });
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'User login success',
+    data: { accessToken: result.accessToken },
+  });
+});
+
+const refreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+  const result = await AuthServices.refreshToken(refreshToken);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Refresh Token',
+    data: result,
+  });
+});
+
+export const AuthControllers = {
+  loginUser,
+  refreshToken,
+};
