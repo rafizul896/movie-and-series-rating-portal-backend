@@ -29,6 +29,7 @@ model Movie {
   title         String
   synopsis      String
   genres        String[]
+  type       MediaType @default(MOVIE)
   releaseYear   Int
   isDeleted     Boolean  @default(false)
   director      String
@@ -38,6 +39,7 @@ model Movie {
   rentPrice     Float
   streamingLink String
   reviews       Review[]
+  isTrending     Boolean  @default(false)
   // watchlist      Watchlist[]
   // purchases      Purchase[]
   createdAt     DateTime @default(now())
@@ -108,4 +110,13 @@ enum UserStatus {
   ACTIVE
   BLOCKED
   DELETED
+}
+
+enum MediaType {
+  MOVIE
+  SERIES
+  // DOCUMENTARY
+  // ANIME
+  // SHOW
+  // SHORT_FILM
 }
