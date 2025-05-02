@@ -6,6 +6,7 @@ import config from '../../config';
 import { generateToken, verifyToken } from './auth.utils';
 import { UserStatus } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
+import sendEmail from '../../utils/sendEmail';
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({
@@ -114,8 +115,48 @@ const changePassword = async (user: JwtPayload, payload: any) => {
   return;
 };
 
+const forgotPassword = async (payload: { email: string }) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, 'Invalid email id');
+  }
+
+  const resetPasswordToken = generateToken(
+    { email: userData.email, role: userData.role },
+    config.JWT.JWT_RESET_PASSWORD_SECRET as string,
+    config.JWT.JWT_RESET_PASSWORD_EXPIRES_IN,
+  );
+
+  const resetPasswordLink =
+    config.RESET_PASSWORD_LINK +
+    `?userId=${userData.id}&token=${resetPasswordToken}`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+      <h2 style="color: #2E86C1;">Password Reset Request</h2>
+      <p>Hi there,</p>
+  
+      <p>We received a request to reset your password for your <strong>Movie and Series Rating & Streaming Portal</strong> account.</p>
+      <p>If you made this request, click the button below to reset your password:</p>
+      <a href="${resetPasswordLink}" target="_blank" style="display: inline-block; margin: 20px 0; padding: 12px 20px; background-color: #2E86C1; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+      <p>This link will expire in 15 minutes for your security.</p>
+      <p>If you didn't request a password reset, you can safely ignore this email.</p>
+      <p>Thanks,<br>The Movie and Series Rating & Streaming Portal Team</p>
+    </div>
+  `;
+
+  await sendEmail(userData.email, html);
+};
+
 export const AuthServices = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
 };
