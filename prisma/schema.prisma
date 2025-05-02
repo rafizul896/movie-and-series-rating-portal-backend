@@ -8,16 +8,95 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  password String
-  role UserRole @default(USER)
-  status UserStatus @default(ACTIVE)
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      UserRole   @default(USER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  reviews  Review[]
+  comments Comment[]
+  likes    Like[]
+
+  @@map("users")
+}
+
+model Movie {
+  id            String   @id @default(uuid())
+  title         String
+  synopsis      String
+  genres        String[]
+  releaseYear   Int
+  isDeleted     Boolean  @default(false)
+  director      String
+  cast          String[]
+  platforms     String[]
+  buyPrice      Float
+  rentPrice     Float
+  streamingLink String
+  reviews       Review[]
+  // watchlist      Watchlist[]
+  // purchases      Purchase[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("movies")
+}
+
+// onUpdate: Cascade, onDelete: Cascade
+model Review {
+  id         String   @id @default(uuid())
+  rating     Int
+  content    String
+  tags       String[]
+  hasSpoiler Boolean  @default(false)
+  approved   Boolean  @default(false)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  movie   Movie  @relation(fields: [movieId], references: [id])
+  movieId String
+
+  likes    Like[]
+  comments Comment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("users")
+  @@map("reviews")
+}
+
+model Comment {
+  id      String @id @default(uuid())
+  content String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  review   Review @relation(fields: [reviewId], references: [id])
+  reviewId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+model Like {
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  review   Review @relation(fields: [reviewId], references: [id])
+  reviewId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, reviewId]) // Ensures one like per user per review
+  @@map("likes")
 }
 
 enum UserRole {
