@@ -35,7 +35,6 @@ const getAllMovie = async (
 
   const andConditions: Prisma.MovieWhereInput[] = [];
 
-  console.log(searchTerm, 'searchTerm');
   if (params?.searchTerm) {
     
     andConditions.push({
@@ -77,18 +76,21 @@ const getAllMovie = async (
     });
   }
   
-  console.log(filterData, 'filterData')
-
+// Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
+      AND: Object.keys(filterData).map((key) => {
+        const value = (filterData as any)[key];
+        const valuesArray = String(value).split(',').map(v => v.trim());
+        return {
+          [key]: {
+            hasSome: valuesArray,
+          },
+        };
+      }),
     });
   }
-
+  
   andConditions.push({
     isDeleted: false,
   });
