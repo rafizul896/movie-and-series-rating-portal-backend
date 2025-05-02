@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync';
 import { movieService } from './movie.service';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
+import pick from '../../shared/pick';
 
 const addAMovie = catchAsync(async (req: Request, res: Response) => {
   const result = await movieService.addAMovie(req.body);
@@ -16,7 +17,12 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllMovie = catchAsync(async (req: Request, res: Response) => {
-  const result = await movieService.getAllMovie();
+  // console.log(req.query)
+    // const filters = pick(req.query, movieFilterableFields);
+    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+    
+
+  const result = await movieService.getAllMovie(req.query, options);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -33,7 +39,7 @@ const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: "updated movie successfully",
+    message: "Movie updated  successfully",
     data: result,
   });
 });
