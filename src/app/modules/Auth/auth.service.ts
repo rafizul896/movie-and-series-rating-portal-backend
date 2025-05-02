@@ -154,9 +154,51 @@ const forgotPassword = async (payload: { email: string }) => {
   await sendEmail(userData.email, html);
 };
 
+const resetPassword = async (
+  token: string,
+  payload: { id: string; password: string },
+) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      id: payload.id,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(status.NOT_FOUND, 'Invalid user id');
+  }
+
+  const isValidToken = verifyToken(
+    token,
+    config.JWT.JWT_RESET_PASSWORD_SECRET as string,
+  );
+
+  if (!isValidToken) {
+    throw new AppError(status.FORBIDDEN, 'Something went wrong.Try again');
+  }
+
+  const hashedPassword = await bcrypt.hash(
+    payload.password,
+    Number(config.BCRYPT_SALt_ROUNDS),
+  );
+
+  await prisma.user.update({
+    where: {
+      id: payload.id,
+    },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return;
+};
+
 export const AuthServices = {
   loginUser,
   refreshToken,
   changePassword,
   forgotPassword,
+  resetPassword,
 };
