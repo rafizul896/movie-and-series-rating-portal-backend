@@ -34,7 +34,6 @@ export default reviewRoutes;
 
 // Comment Service
 // POST /api/comments - Add comment to review
-
 // GET /api/comments/:reviewId - Get comments for a review
 
 // Like Service

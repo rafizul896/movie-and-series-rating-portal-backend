@@ -37,7 +37,6 @@ const getAllMovie = async (
   const andConditions: Prisma.MovieWhereInput[] = [];
 
   if (params?.searchTerm) {
-    
     andConditions.push({
       OR: movieFilterableFields.map(({ field, operator }) => {
         if (operator === 'equals') {
@@ -52,17 +51,17 @@ const getAllMovie = async (
             },
           };
         }
-  
+
         if (operator === 'hasSome') {
-          const arrayValue = [(String(searchTerm))]
-      
+          const arrayValue = [String(searchTerm)];
+
           return {
             [field]: {
               hasSome: arrayValue,
             },
           };
         }
-  
+
         if (operator === 'contains') {
           return {
             [field]: {
@@ -71,18 +70,20 @@ const getAllMovie = async (
             },
           };
         }
-  
+
         return {};
       }),
     });
   }
-  
-// Filter by genres, platforms, and rating
+
+  // Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => {
         const value = (filterData as any)[key];
-        const valuesArray = String(value).split(',').map(v => v.trim());
+        const valuesArray = String(value)
+          .split(',')
+          .map((v) => v.trim());
         return {
           [key]: {
             hasSome: valuesArray,
@@ -91,7 +92,7 @@ const getAllMovie = async (
       }),
     });
   }
-  
+
   andConditions.push({
     isDeleted: false,
   });
@@ -134,36 +135,36 @@ const getAllMovie = async (
 };
 
 const getAMovie = async (id: string) => {
-  const result  = await prisma.movie.findUnique({
+  const result = await prisma.movie.findUnique({
     where: {
       id,
       isDeleted: false,
-    },include:{
+    },
+    include: {
       reviews: {
         where: {
           approved: true,
           user: {
-            status: UserStatus.ACTIVE
-          }
+            status: UserStatus.ACTIVE,
+          },
         },
         include: {
-          user:{
-            select:{
-              id:true,
-              name:true,
-              email:true,
-              profileImage:true,
-              role:true,
-              status:true
-            }
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profileImage: true,
+              role: true,
+              status: true,
+            },
           },
-          
         },
       },
-    }
-  })
+    },
+  });
   if (!result) {
-    throw new AppError(404,'Movie not found');
+    throw new AppError(404, 'Movie not found');
   }
   return result;
 };
@@ -210,5 +211,4 @@ export const movieService = {
   getAMovie,
   updateAMovie,
   deleteAMovie,
-
 };

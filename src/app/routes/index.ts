@@ -3,6 +3,7 @@ import { UserRoutes } from '../modules/User/user.route';
 import movieRoutes from '../modules/movie/movie.route';
 import reviewRoutes from '../modules/review/review.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
+import commentRoutes from '../modules/comment/controller.route';
 
 const router = Router();
 
@@ -18,10 +19,15 @@ const moduleRoutes = [
   {
     path: '/reviews',
     route: reviewRoutes,
-  },{
+  },
+  {
     path: '/auth',
     route: AuthRoutes,
-  }
+  },
+  {
+    path: '/comments',
+    route: commentRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
