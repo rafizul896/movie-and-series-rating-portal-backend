@@ -136,27 +136,44 @@ const getAllMovie = async (
 
 const getAMovie = async (id: string) => {
   const result = await prisma.movie.findUnique({
-    where: {
-      id,
-      isDeleted: false,
-    },
-    include: {
+    where: { id, isDeleted: false },
+    select: {
+      id: true,
+      title: true,
+      synopsis: true,
+      genres: true,
+      type: true,
+      releaseYear: true,
+      director: true,
+      cast: true,
+      platforms: true,
+      buyPrice: true,
+      rentPrice: true,
+      streamingLink: true,
+      isTrending: true,
+
       reviews: {
         where: {
           approved: true,
-          user: {
-            status: UserStatus.ACTIVE,
-          },
+          user: { status: UserStatus.ACTIVE },
         },
-        include: {
+        select: {
+          id: true,
+          rating: true,
+          content: true,
+          tags: true,
+          hasSpoiler: true,
           user: {
             select: {
               id: true,
               name: true,
-              email: true,
               profileImage: true,
-              role: true,
-              status: true,
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
             },
           },
         },

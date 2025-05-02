@@ -1,6 +1,7 @@
 import { Review, User } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../errors/AppError';
+import { count } from 'console';
 
 const createReview = async (payload: Review) => {
   const result = await prisma.$transaction(async (tx) => {
@@ -58,6 +59,27 @@ const getReviewsByMovieId = async (movieId: string) => {
   const result = await prisma.review.findMany({
     where: {
       movieId,
+    },
+    include: {
+      _count: {
+        select: {
+          likes: true,   
+          comments: true 
+        }
+      },
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          userId: true
+      }},
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
   });
   return result;
