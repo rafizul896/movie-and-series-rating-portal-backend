@@ -5,6 +5,7 @@ import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
 import { movieFilterableFields } from './movie.const';
+import AppError from '../../errors/AppError';
 
 const addAMovie = async (movieData: Movie) => {
   const result = await prisma.movie.create({
@@ -35,7 +36,6 @@ const getAllMovie = async (
 
   const andConditions: Prisma.MovieWhereInput[] = [];
 
-  console.log(searchTerm, 'searchTerm');
   if (params?.searchTerm) {
     
     andConditions.push({
@@ -77,18 +77,21 @@ const getAllMovie = async (
     });
   }
   
-  console.log(filterData, 'filterData')
-
+// Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
+      AND: Object.keys(filterData).map((key) => {
+        const value = (filterData as any)[key];
+        const valuesArray = String(value).split(',').map(v => v.trim());
+        return {
+          [key]: {
+            hasSome: valuesArray,
+          },
+        };
+      }),
     });
   }
-
+  
   andConditions.push({
     isDeleted: false,
   });
@@ -130,6 +133,19 @@ const getAllMovie = async (
   // return result;
 };
 
+const getAMovie = async (id: string) => {
+  const result  = await prisma.movie.findUnique({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  })
+  if (!result) {
+    throw new AppError(404,'Movie not found');
+  }
+  return result;
+};
+
 const updateAMovie = async (id: string, payload: any) => {
   await prisma.movie.findUniqueOrThrow({
     where: {
@@ -169,6 +185,8 @@ const deleteAMovie = async (id: string) => {
 export const movieService = {
   addAMovie,
   getAllMovie,
+  getAMovie,
   updateAMovie,
   deleteAMovie,
+
 };
