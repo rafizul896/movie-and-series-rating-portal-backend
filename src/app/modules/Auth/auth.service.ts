@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import config from '../../config';
 import { generateToken, verifyToken } from './auth.utils';
 import { UserStatus } from '@prisma/client';
+import { JwtPayload } from 'jsonwebtoken';
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({
@@ -79,7 +80,39 @@ const refreshToken = async (token: string) => {
   return { accessToken };
 };
 
-const changePassword = async () => {};
+const changePassword = async (user: JwtPayload, payload: any) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: user.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const isCurrectPassword: boolean = await bcrypt.compare(
+    payload.oldPassword,
+    userData.password,
+  );
+
+  if (!isCurrectPassword) {
+    throw new AppError(status.UNAUTHORIZED, 'Your Password is Wrong!');
+  }
+
+  const hashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.BCRYPT_SALt_ROUNDS),
+  );
+
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+    },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return;
+};
 
 export const AuthServices = {
   loginUser,
