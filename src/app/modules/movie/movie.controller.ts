@@ -17,21 +17,35 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllMovie = catchAsync(async (req: Request, res: Response) => {
-  // console.log(req.query)
-    // const filters = pick(req.query, movieFilterableFields);
-    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
-    
-
-  const result = await movieService.getAllMovie(req.query, options);
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, [
+    'genres',
+    'platforms',
+    'searchTerm',
+    'title',
+    'rating',
+  ]);
+  const result = await movieService.getAllMovie(filters, options);
 
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Fetch all movie successfully',
+    message: 'Retrieve all movie data successfully',
     data: result,
   });
 });
 
+const getAMovie = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await movieService.getAMovie(id);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'Retrieve movie data successfully',
+    data: result,
+  });
+});
 const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await movieService.updateAMovie(id, req.body);
@@ -39,7 +53,7 @@ const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: "Movie updated  successfully",
+    message: 'Movie updated  successfully',
     data: result,
   });
 });
@@ -51,13 +65,14 @@ const deleteAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: "Movie deleted successfully",
+    message: 'Movie deleted successfully',
     data: result,
   });
 });
 export const movieController = {
   addAMovie,
   getAllMovie,
+  getAMovie,
   updateAMovie,
-  deleteAMovie
+  deleteAMovie,
 };
