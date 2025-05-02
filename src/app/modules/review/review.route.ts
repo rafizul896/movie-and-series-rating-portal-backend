@@ -10,8 +10,14 @@ reviewRoutes.post("/", reviewController.createReview)
 reviewRoutes.get("/movie/", reviewController.getAllReview)
 reviewRoutes.get("/:id", reviewController.getSingleReview)
 reviewRoutes.get("/movie/:movieId", reviewController.getReviewsByMovieId)
-// reviewRoutes.patch("/:id", movieController.updateAMovie)
-// reviewRoutes.delete("/soft/:id", movieController.deleteAMovie)
+
+
+
+reviewRoutes.patch("/:id/approve",auth(UserRole.ADMIN), reviewController.approvedReview) // (admin) Approve/unpublish
+
+reviewRoutes.patch("/:reviewId",auth(UserRole.USER), reviewController.editReview) // Edit review (if unpublished)
+reviewRoutes.delete("/:id",auth(UserRole.USER), reviewController.deleteReview) // Delete review (if unpublished)
+
 
 export default reviewRoutes;
 

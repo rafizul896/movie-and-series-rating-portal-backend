@@ -48,6 +48,45 @@ const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const editReview = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+const { reviewId } = req.params;
+  const result = await reviewService.editReview(user,reviewId, req.body);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'Retrieve reviews data by movieId successfully',
+    data: result,
+  });
+});
+
+const approvedReview = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+const { id } = req.params;
+  const result = await reviewService.approvedReview(user,id);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'Approved review successfully',
+    data: result,
+  });
+});
+
+const deleteReview = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+const { id } = req.params;
+  const result = await reviewService.deleteReview(user,id);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'Review Deleted successfully',
+    data: result,
+  });
+});
+
 // const getAllMovie = catchAsync(async (req: Request, res: Response) => {
 //   const result = await movieService.getAllMovie();
 
@@ -86,7 +125,8 @@ export const reviewController = {
   createReview,
   getSingleReview,
   getAllReview,
-  getReviewsByMovieId
-  // updateAMovie,
-  // deleteAMovie
+  getReviewsByMovieId,
+  editReview,
+  approvedReview,
+  deleteReview
 };
