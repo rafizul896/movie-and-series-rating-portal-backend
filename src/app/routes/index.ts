@@ -16,7 +16,7 @@ const moduleRoutes = [
     route: movieRoutes,
   },
   {
-    path: '/review',
+    path: '/reviews',
     route: reviewRoutes,
   },{
     path: '/auth',

@@ -138,7 +138,7 @@ const getAMovie = async (id: string) => {
     where: {
       id,
       isDeleted: false,
-    },
+    }
   })
   if (!result) {
     throw new AppError(404,'Movie not found');
