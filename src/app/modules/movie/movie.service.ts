@@ -5,6 +5,7 @@ import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
 import { movieFilterableFields } from './movie.const';
+import AppError from '../../errors/AppError';
 
 const addAMovie = async (movieData: Movie) => {
   const result = await prisma.movie.create({
@@ -132,6 +133,19 @@ const getAllMovie = async (
   // return result;
 };
 
+const getAMovie = async (id: string) => {
+  const result  = await prisma.movie.findUnique({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  })
+  if (!result) {
+    throw new AppError(404,'Movie not found');
+  }
+  return result;
+};
+
 const updateAMovie = async (id: string, payload: any) => {
   await prisma.movie.findUniqueOrThrow({
     where: {
@@ -171,6 +185,8 @@ const deleteAMovie = async (id: string) => {
 export const movieService = {
   addAMovie,
   getAllMovie,
+  getAMovie,
   updateAMovie,
   deleteAMovie,
+
 };
