@@ -19,4 +19,10 @@ router.get(
   WatchlistControllers.getAllWatchlist,
 );
 
+router.delete(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  WatchlistControllers.deleteWatchlistItem,
+);
+
 export const WatchlistRoutes = router;
