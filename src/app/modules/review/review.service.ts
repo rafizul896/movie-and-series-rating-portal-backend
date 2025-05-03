@@ -49,6 +49,7 @@ const getSingleReview = async (reviewId: string) => {
   const result = await prisma.review.findUniqueOrThrow({
     where: {
       id: reviewId,
+      approved: true
     },
   });
   return result;
@@ -84,11 +85,14 @@ const getReviewsByMovieId = async (movieId: string) => {
   return result;
 };
 
+// get all approved reviews
 const getAllReview = async () => {
   const result = await prisma.review.findMany();
   return result;
 };
+// get all unapproved reviews
 
+// edit review by user if the review is not approved
 const editReview = async (
   user: Partial<User>,
   reviewId: string,
@@ -104,6 +108,7 @@ const editReview = async (
     const review = await tx.review.findFirst({
       where: {
         id: reviewId,
+        approved:false,
         userId: user.id,
       },
     });
