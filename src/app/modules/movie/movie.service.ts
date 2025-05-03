@@ -143,7 +143,7 @@ const getAMovie = async (
     options || {},
   );
 
-  //  Step 1: Review condition তৈরি
+  //  Step 1: Review condition 
   type ReviewCondition =
     | { approved: boolean }
     | { userId: string; approved: boolean };
@@ -155,7 +155,7 @@ const getAMovie = async (
   const reviewWhereConditions = {
     OR: reviewOrConditions,
     movieId: id,
-    // user: { status: UserStatus.ACTIVE }, // optional, if needed
+    // user: { status: UserStatus.ACTIVE },
   };
 
   //  Step 2: Fetch movie details with paginated reviews
