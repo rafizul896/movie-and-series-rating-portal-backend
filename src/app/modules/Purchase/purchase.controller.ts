@@ -27,7 +27,8 @@ const getPurchasesByUser = catchAsync(async (req, res) => {
 });
 
 const updatePurchase = catchAsync(async (req, res) => {
-  const result = await PurchaseServices.updatePurchase();
+  const { id } = req.params;
+  const result = await PurchaseServices.updatePurchase(id, req.body);
 
   sendResponse(res, {
     statusCode: status.OK,

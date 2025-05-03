@@ -19,4 +19,16 @@ router.get(
   PurchaseControllers.getPurchasesByUser,
 );
 
+router.patch(
+  '/:id',
+  validationRequest(PurchaseValidation.updatePurchaseZodSchema),
+  PurchaseControllers.updatePurchase,
+);
+
+router.delete(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  PurchaseControllers.deletePurchase,
+);
+
 export const PurchaseRoutes = router;
