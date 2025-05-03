@@ -1,6 +1,9 @@
 import { Review, User, UserRole } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
+import { ReviewFilter } from './review.interface';
+import { IPaginationOptions } from '../../interface/pagination';
+import { paginationHelper } from '../../helpers/paginationHelpers';
 
 const createReview = async (payload: Review) => {
   const result = await prisma.$transaction(async (tx) => {
@@ -95,7 +98,49 @@ const getAllReview = async () => {
   });
   return result;
 };
-// get all unapproved reviews
+
+// get all reviews data based on filter
+const getReviews = async (
+  filter: ReviewFilter = 'all',
+  options: IPaginationOptions,
+) => {
+  let whereCondition = {};
+
+  if (filter === 'approved') {
+    whereCondition = { approved: true };
+  } else if (filter === 'unapproved') {
+    whereCondition = { approved: false };
+  }
+
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+
+  const result = await prisma.review.findMany({
+    where: whereCondition,
+    include: {
+      movie: true,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: 'desc' },
+  });
+
+  // Count total reviews for pagination
+  const total = await prisma.review.count({
+    where: whereCondition,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 
 // edit review by user if the review is not approved
 const editReview = async (
@@ -207,6 +252,5 @@ export const reviewService = {
   editReview,
   approvedReview,
   deleteReview,
-  // updateAMovie,
-  // deleteAMovie
+  getReviews,
 };

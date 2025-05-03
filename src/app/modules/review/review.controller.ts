@@ -4,6 +4,8 @@ import {  reviewService } from './review.service';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
 import { User } from '@prisma/client';
+import { ReviewFilter } from './review.interface';
+import pick from '../../shared/pick';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
   const result = await reviewService.createReview(req.body);
@@ -70,7 +72,22 @@ const { id } = req.params;
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Approved review successfully',
+    message: 'Review approved successfully',
+    data: result,
+  });
+});
+
+const getReviews = catchAsync(async (req: Request, res: Response) => {
+const filterOptions  = req?.query?.filter as ReviewFilter;
+
+const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+  const result = await reviewService.getReviews(filterOptions, options);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: `Retrieve ${filterOptions} reviews successfully`,
     data: result,
   });
 });
@@ -95,5 +112,6 @@ export const reviewController = {
   getReviewsByMovieId,
   editReview,
   approvedReview,
-  deleteReview
+  deleteReview,
+  getReviews
 };

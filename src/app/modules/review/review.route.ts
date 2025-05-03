@@ -11,6 +11,7 @@ const reviewRoutes = Router();
 reviewRoutes.post("/",auth(UserRole.ADMIN, UserRole.USER),validationRequest(reviewValidation.addReviewSchema), reviewController.createReview)
 
 reviewRoutes.get("/movie/", reviewController.getAllReview)
+reviewRoutes.get("/movie/status", reviewController.getReviews) // (admin) Get all unapproved reviews
 reviewRoutes.get("/:id", reviewController.getSingleReview)
 reviewRoutes.get("/movie/:movieId", reviewController.getReviewsByMovieId)
 

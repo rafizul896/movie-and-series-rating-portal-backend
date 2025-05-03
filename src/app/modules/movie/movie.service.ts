@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Movie, Prisma, UserStatus } from '@prisma/client';
+import { Movie, Prisma } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
