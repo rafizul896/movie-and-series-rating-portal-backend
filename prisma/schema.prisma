@@ -20,6 +20,8 @@ model User {
   reviews  Review[]
   comments Comment[]
   likes    Like[]
+  watchlists Watchlist[]
+  purchase Purchase[]
 
   @@map("users")
 }
@@ -40,8 +42,8 @@ model Movie {
   streamingLink String
   reviews       Review[]
   isTrending     Boolean  @default(false)
-  // watchlist      Watchlist[]
-  // purchases      Purchase[]
+  watchlists      Watchlist[]
+  purchase      Purchase[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -99,6 +101,48 @@ model Like {
 
   @@unique([userId, reviewId]) // Ensures one like per user per review
   @@map("likes")
+}
+
+model Watchlist {
+  id String @id @default(uuid()) 
+  userId String
+  movieId String
+
+  users User @relation(fields: [userId], references: [id])
+  movies Movie @relation(fields: [movieId],references: [id])
+  @@unique([userId,movieId])
+  @@map("watchlists")
+}
+
+model Purchase {
+  id String @id @default(uuid())
+  purchase_type PurchaseType
+  userId String
+  movieId String
+  amount Float
+  currency String
+  paymentStatus PaymentStatus
+  transactionId String
+  purchasedAt DateTime @default(now())
+  accessExpiryTime DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@map("purchase")
+}
+
+enum PurchaseType {
+  BUY
+  RENT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }
 
 enum UserRole {
