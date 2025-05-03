@@ -11,7 +11,7 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Add new movie successfully',
+    message: 'Movie added successfully',
     data: result,
   });
 });
@@ -53,7 +53,7 @@ const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Movie updated  successfully',
+    message: 'Movie updated successfully',
     data: result,
   });
 });

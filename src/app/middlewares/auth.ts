@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import AppError from '../errors/AppError';
 import status from 'http-status';
 import { verifyToken } from '../modules/Auth/auth.utils';
 import config from '../config';
 import { Secret } from 'jsonwebtoken';
 import prisma from '../shared/prisma';
 import { UserStatus } from '@prisma/client';
+import AppError from '../error/AppError';
 
 const auth = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
