@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  name      String
-  email     String     @unique
-  password  String
-  role      UserRole   @default(USER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           String     @id @default(uuid())
+  name         String
+  profileImage String?
+  email        String     @unique
+  password     String
+  role         UserRole   @default(USER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   reviews  Review[]
   comments Comment[]
@@ -27,13 +28,13 @@ model User {
 }
 
 model Movie {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   title         String
   synopsis      String
   genres        String[]
-  type       MediaType @default(MOVIE)
+  type          MediaType @default(MOVIE)
   releaseYear   Int
-  isDeleted     Boolean  @default(false)
+  isDeleted     Boolean   @default(false)
   director      String
   cast          String[]
   platforms     String[]
@@ -59,7 +60,7 @@ model Review {
   hasSpoiler Boolean  @default(false)
   approved   Boolean  @default(false)
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId String
 
   movie   Movie  @relation(fields: [movieId], references: [id])
@@ -77,7 +78,7 @@ model Review {
 model Comment {
   id      String @id @default(uuid())
   content String
-  user    User   @relation(fields: [userId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId  String
 
   review   Review @relation(fields: [reviewId], references: [id])
@@ -91,7 +92,7 @@ model Comment {
 
 model Like {
   id       String @id @default(uuid())
-  user     User   @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId   String
   review   Review @relation(fields: [reviewId], references: [id])
   reviewId String

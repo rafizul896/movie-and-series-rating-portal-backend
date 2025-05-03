@@ -5,6 +5,8 @@ import reviewRoutes from '../modules/review/review.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
 import { WatchlistRoutes } from '../modules/Watchlist/watchlist.route';
 import { PurchaseRoutes } from '../modules/Purchase/purchase.route';
+import commentRoutes from '../modules/comment/controller.route';
+import likeRoutes from '../modules/Like/like.route';
 
 const router = Router();
 
@@ -18,7 +20,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
     route: movieRoutes,
   },
   {
-    path: '/review',
+    path: '/reviews',
     route: reviewRoutes,
   },
   {
@@ -32,6 +34,14 @@ const moduleRoutes: { path: string; route: Router }[] = [
   {
     path: '/purchase',
     route: PurchaseRoutes,
+  },
+  {
+    path: '/comments',
+    route: commentRoutes,
+  },
+  {
+    path: '/likes',
+    route: likeRoutes,
   },
 ];
 
