@@ -7,6 +7,7 @@ import { WatchlistRoutes } from '../modules/Watchlist/watchlist.route';
 import { PurchaseRoutes } from '../modules/Purchase/purchase.route';
 import commentRoutes from '../modules/comment/controller.route';
 import likeRoutes from '../modules/Like/like.route';
+import { PaymentRoutes } from '../modules/Payment/payment.route';
 
 const router = Router();
 
@@ -42,6 +43,10 @@ const moduleRoutes: { path: string; route: Router }[] = [
   {
     path: '/likes',
     route: likeRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
 ];
 
