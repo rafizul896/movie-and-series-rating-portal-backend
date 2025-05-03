@@ -151,6 +151,8 @@ const getAMovie = async (id: string) => {
       rentPrice: true,
       streamingLink: true,
       isTrending: true,
+      thumbnail: true,
+      discountPrice: true,
 
       reviews: {
         where: {

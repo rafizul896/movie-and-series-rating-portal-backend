@@ -30,6 +30,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
 
   const jwtPayload = {
     email: userData.email,
+    id: userData.id,
     role: userData.role,
   };
 
@@ -69,6 +70,7 @@ const refreshToken = async (token: string) => {
 
   const jwtPayload = {
     email: isUserExists?.email,
+    id: isUserExists?.id,
     role: isUserExists?.role,
   };
 
