@@ -3,12 +3,14 @@ import { UserRoutes } from '../modules/User/user.route';
 import movieRoutes from '../modules/movie/movie.route';
 import reviewRoutes from '../modules/review/review.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
+import { WatchlistRoutes } from '../modules/Watchlist/watchlist.route';
+import { PurchaseRoutes } from '../modules/Purchase/purchase.route';
 import commentRoutes from '../modules/comment/controller.route';
 import likeRoutes from '../modules/Like/like.route';
 
 const router = Router();
 
-const moduleRoutes = [
+const moduleRoutes: { path: string; route: Router }[] = [
   {
     path: '/user',
     route: UserRoutes,
@@ -24,6 +26,14 @@ const moduleRoutes = [
   {
     path: '/auth',
     route: AuthRoutes,
+  },
+  {
+    path: '/watchlist',
+    route: WatchlistRoutes,
+  },
+  {
+    path: '/purchase',
+    route: PurchaseRoutes,
   },
   {
     path: '/comments',
