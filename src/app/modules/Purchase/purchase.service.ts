@@ -25,25 +25,40 @@ const createPurchase = async (payload: any) => {
 };
 
 const getPurchasesByUser = async (email: string) => {
-    const userData = await prisma.user.findUnique({
-        where: {
-          email,
-        },
-      });
-    
-      const result = await prisma.purchase.findMany({
-        where: {
-          userId: userData?.id,
-        },
-      });
-    
-      return result;
+  const userData = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  const result = await prisma.purchase.findMany({
+    where: {
+      userId: userData?.id,
+    },
+  });
+
+  return result;
 };
 
-const updatePurchase = async () => {};
+const updatePurchase = async (id: string, payload: any) => {
+  const result = await prisma.purchase.update({
+    where: {
+      id,
+    },
+    data: payload,
+  });
+
+  return result;
+};
 
 const deletePurchase = async (id: string) => {
-  console.log(id);
+  const result = await prisma.purchase.delete({
+    where: {
+      id,
+    },
+  });
+
+  return result;
 };
 
 export const PurchaseServices = {
