@@ -24,7 +24,7 @@ const createWatchlist = async (payload: {
   return result;
 };
 
-const getAllWatchlist = async (email: string) => {
+const getAllWatchlistByUser = async (email: string) => {
   const userData = await prisma.user.findUnique({
     where: {
       email,
@@ -52,6 +52,6 @@ const deleteWatchlistItem = async (id: string) => {
 
 export const WatchlistServices = {
   createWatchlist,
-  getAllWatchlist,
+  getAllWatchlistByUser,
   deleteWatchlistItem,
 };

@@ -14,8 +14,8 @@ const createWatchlist = catchAsync(async (req, res) => {
   });
 });
 
-const getAllWatchlist = catchAsync(async (req, res) => {
-  const result = await WatchlistServices.getAllWatchlist(req?.user?.email);
+const getAllWatchlistByUser = catchAsync(async (req, res) => {
+  const result = await WatchlistServices.getAllWatchlistByUser(req?.user?.email);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -39,6 +39,6 @@ const deleteWatchlistItem = catchAsync(async (req, res) => {
 
 export const WatchlistControllers = {
   createWatchlist,
-  getAllWatchlist,
+  getAllWatchlistByUser,
   deleteWatchlistItem,
 };

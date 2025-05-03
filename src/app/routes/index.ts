@@ -4,10 +4,11 @@ import movieRoutes from '../modules/movie/movie.route';
 import reviewRoutes from '../modules/review/review.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
 import { WatchlistRoutes } from '../modules/Watchlist/watchlist.route';
+import { PurchaseRoutes } from '../modules/Purchase/purchase.route';
 
 const router = Router();
 
-const moduleRoutes = [
+const moduleRoutes: { path: string; route: Router }[] = [
   {
     path: '/user',
     route: UserRoutes,
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: '/watchlist',
     route: WatchlistRoutes,
+  },
+  {
+    path: '/purchase',
+    route: PurchaseRoutes,
   },
 ];
 

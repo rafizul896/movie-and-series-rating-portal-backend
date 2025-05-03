@@ -16,7 +16,7 @@ router.post(
 router.get(
   '/',
   auth(UserRole.USER, UserRole.ADMIN),
-  WatchlistControllers.getAllWatchlist,
+  WatchlistControllers.getAllWatchlistByUser,
 );
 
 router.delete(

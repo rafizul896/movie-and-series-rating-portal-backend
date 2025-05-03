@@ -130,6 +130,7 @@ model Purchase {
 
   users User @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
+  @@unique([userId, movieId])
 
   @@map("purchase")
 }
