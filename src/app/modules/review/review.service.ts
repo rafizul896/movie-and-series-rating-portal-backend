@@ -1,4 +1,4 @@
-import { Review, User } from '@prisma/client';
+import { Review, User, UserRole } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 
@@ -12,19 +12,12 @@ const createReview = async (payload: Review) => {
       throw new AppError(404, 'Movie not found');
     }
 
-    // 2. Check if the user exists
-    const userExists = await tx.user.findUnique({
-      where: { id: payload.userId },
-    });
-    if (!userExists) {
-      throw new AppError(404, 'User not found');
-    }
-
-    // 3. Check if the review already exists
+    // 2. Check if the review already exists
     const existingReview = await tx.review.findFirst({
       where: {
         movieId: payload.movieId,
         userId: payload.userId,
+        approved: false, // Check for unapproved reviews
       },
     });
     if (existingReview) {
@@ -34,7 +27,7 @@ const createReview = async (payload: Review) => {
       );
     }
 
-    // 4. Create the review
+    // 3. Create the review
     const createdReview = await tx.review.create({
       data: payload,
     });
@@ -49,13 +42,20 @@ const getSingleReview = async (reviewId: string) => {
   const result = await prisma.review.findUniqueOrThrow({
     where: {
       id: reviewId,
-      approved: true
+      approved: true,
     },
   });
   return result;
 };
 
 const getReviewsByMovieId = async (movieId: string) => {
+  // Check if the movie exists
+  const movieExists = await prisma.movie.findUnique({
+    where: { id: movieId, isDeleted: false },
+  });
+  if (!movieExists) {
+    throw new AppError(404, 'Movie not found');
+  }
   const result = await prisma.review.findMany({
     where: {
       movieId,
@@ -63,16 +63,17 @@ const getReviewsByMovieId = async (movieId: string) => {
     include: {
       _count: {
         select: {
-          likes: true,   
-          comments: true 
-        }
+          likes: true,
+          comments: true,
+        },
       },
       comments: {
         select: {
           id: true,
           content: true,
-          userId: true
-      }},
+          userId: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -87,7 +88,11 @@ const getReviewsByMovieId = async (movieId: string) => {
 
 // get all approved reviews
 const getAllReview = async () => {
-  const result = await prisma.review.findMany();
+  const result = await prisma.review.findMany({
+    where: {
+      approved: true,
+    },
+  });
   return result;
 };
 // get all unapproved reviews
@@ -99,16 +104,10 @@ const editReview = async (
   payload: any,
 ) => {
   const result = await prisma.$transaction(async (tx) => {
-    // 1. check if the user exists
-    await tx.user.findUniqueOrThrow({
-      where: { email: user?.email },
-    });
-
-    // 2. Find the review that belongs to the user and is not yet approved
+    // 1. Find the review that belongs to the user and is not yet approved
     const review = await tx.review.findFirst({
       where: {
         id: reviewId,
-        approved:false,
         userId: user.id,
       },
     });
@@ -117,13 +116,13 @@ const editReview = async (
       throw new AppError(403, 'Review not found');
     }
 
-    // 3. check if the review is published or not
+    // 2. check if the review is published or not
     if (review?.approved === true) {
       throw new AppError(403, 'You cannot edit an approved review');
     }
     const { approved, ...existingReview } = payload;
 
-    // 4. update the review
+    // 3. update the review
     const updatedReview = await tx.review.update({
       where: {
         id: review.id,
@@ -138,15 +137,10 @@ const editReview = async (
 
 const approvedReview = async (user: Partial<User>, reviewId: string) => {
   const result = await prisma.$transaction(async (tx) => {
-    // 1. check if the user exists
-    await tx.user.findUniqueOrThrow({
-      where: { email: user?.email },
-    });
-
-    // 2. Find the review 
+    // 1. Find the review
     const review = await tx.review.findFirst({
       where: {
-        id: reviewId
+        id: reviewId,
       },
     });
 
@@ -154,7 +148,7 @@ const approvedReview = async (user: Partial<User>, reviewId: string) => {
       throw new AppError(403, 'Review not found');
     }
 
-    // 3. check if the review is published or not
+    // 2. check if the review is published or not
     if (review?.approved === true) {
       throw new AppError(403, 'The review is already approved');
     }
@@ -165,7 +159,7 @@ const approvedReview = async (user: Partial<User>, reviewId: string) => {
         id: review.id,
       },
       data: {
-        approved: true
+        approved: true,
       },
     });
 
@@ -176,35 +170,31 @@ const approvedReview = async (user: Partial<User>, reviewId: string) => {
 
 const deleteReview = async (user: Partial<User>, reviewId: string) => {
   const result = await prisma.$transaction(async (tx) => {
-    // 1. check if the user exists
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { email: user?.email },
     });
 
-    // 2. Find the review 
+    const isAdmin = checkUser.role === UserRole.ADMIN;
+
     const review = await tx.review.findFirst({
       where: {
         id: reviewId,
-        userId: checkUser.id,
+        ...(isAdmin ? {} : { userId: checkUser.id }), // if not admin then check userID!
       },
     });
 
     if (!review) {
-      throw new AppError(403, 'Review not found');
+      throw new AppError(404, 'Review not found');
     }
 
-    // 3. check if the review is published or not
-    if (review?.approved === true) {
+    if (!isAdmin && review.approved) {
       throw new AppError(403, 'You cannot delete an approved review');
     }
-    // 3. delete the review
-    const deleteReview = await tx.review.delete({
-      where: {
-        id: review.id,
-      }
-    });
 
-    return deleteReview;
+    // 3. delete the review
+    return await tx.review.delete({
+      where: { id: review.id },
+    });
   });
   return result;
 };
@@ -216,7 +206,7 @@ export const reviewService = {
   getReviewsByMovieId,
   editReview,
   approvedReview,
-  deleteReview
+  deleteReview,
   // updateAMovie,
   // deleteAMovie
 };
