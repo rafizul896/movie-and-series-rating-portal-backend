@@ -18,4 +18,5 @@ export default {
   RESET_PASSWORD_LINK: process.env.RESET_PASSWORD_LINK,
   EMAIL_PASS: process.env.EMAIL_PASS,
   EMAIL_USER: process.env.EMAIL_USER,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 };
