@@ -1,6 +1,6 @@
-import { Comment, Prisma, User } from '@prisma/client';
+import { Comment, User } from '@prisma/client';
 import prisma from '../../shared/prisma';
-import AppError from '../../errors/AppError';
+import AppError from '../../error/AppError';
 
 const addAComment = async (user: Partial<User>, payload: Comment) => {
   const result = await prisma.$transaction(async (tx) => {
