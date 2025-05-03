@@ -1,13 +1,15 @@
-import { Comment, User } from '@prisma/client';
+import { Comment, User, UserStatus } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 
 const addAComment = async (user: Partial<User>, payload: Comment) => {
+
   const result = await prisma.$transaction(async (tx) => {
     // check if the user is logged in
     const userExists = await tx.user.findUnique({
       where: {
-        email: user.email,
+        email: user?.email,
+        status: UserStatus.ACTIVE
       },
     });
 

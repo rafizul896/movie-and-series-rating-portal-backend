@@ -134,7 +134,17 @@ const getAllMovie = async (
   // return result;
 };
 
-const getAMovie = async (id: string) => {
+const getAMovie = async (id: string,  options: IPaginationOptions, userId?: string) => {
+
+  const { page, limit, skip } = paginationHelper.calculatePagination(options || {});
+  // Extract review filtering 
+  const reviewWhereConditions = {
+    OR: userId
+      ? [{ approved: true }, { userId, approved: false }]
+      : [{ approved: true }],
+    user: { status: UserStatus.ACTIVE },
+  };
+
   const result = await prisma.movie.findUnique({
     where: { id, isDeleted: false },
     select: {
@@ -155,10 +165,17 @@ const getAMovie = async (id: string) => {
       discountPrice: true,
 
       reviews: {
-        where: {
-          approved: true,
-          user: { status: UserStatus.ACTIVE },
-        },
+        where: reviewWhereConditions,
+        skip,
+        take: limit,
+        orderBy:
+          options.sortBy && options.sortOrder
+            ? {
+                [options.sortBy]: options.sortOrder,
+              }
+            : {
+                createdAt: 'desc',
+              },
         select: {
           id: true,
           rating: true,
@@ -185,7 +202,23 @@ const getAMovie = async (id: string) => {
   if (!result) {
     throw new AppError(404, 'Movie not found');
   }
-  return result;
+
+  // Count total number of matching reviews for pagination meta
+  const total = await prisma.review.count({
+    where: {
+      movieId: id,
+      ...reviewWhereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const updateAMovie = async (id: string, payload: any) => {
