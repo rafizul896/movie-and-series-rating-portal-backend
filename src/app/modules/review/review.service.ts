@@ -1,7 +1,6 @@
 import { Review, User } from '@prisma/client';
 import prisma from '../../shared/prisma';
-import AppError from '../../errors/AppError';
-import { count } from 'console';
+import AppError from '../../error/AppError';
 
 const createReview = async (payload: Review) => {
   const result = await prisma.$transaction(async (tx) => {

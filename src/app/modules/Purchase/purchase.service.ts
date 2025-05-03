@@ -1,6 +1,6 @@
 import status from 'http-status';
-import AppError from '../../errors/AppError';
 import prisma from '../../shared/prisma';
+import AppError from '../../error/AppError';
 
 const createPurchase = async (payload: any) => {
   const exists = await prisma.purchase.findFirst({
