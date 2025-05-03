@@ -1,5 +1,4 @@
 import status from 'http-status';
-import AppError from '../../errors/AppError';
 import prisma from '../../shared/prisma';
 import bcrypt from 'bcrypt';
 import config from '../../config';
@@ -7,6 +6,7 @@ import { generateToken, verifyToken } from './auth.utils';
 import { UserStatus } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
 import sendEmail from '../../utils/sendEmail';
+import AppError from '../../error/AppError';
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({

@@ -5,7 +5,7 @@ import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
 import { movieFilterableFields } from './movie.const';
-import AppError from '../../errors/AppError';
+import AppError from '../../error/AppError';
 
 const addAMovie = async (movieData: Movie) => {
   const result = await prisma.movie.create({
