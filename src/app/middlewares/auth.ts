@@ -34,7 +34,7 @@ const auth = (...roles: string[]) => {
       });
 
       if (userData?.status !== UserStatus.ACTIVE) {
-        throw new AppError(status.UNAUTHORIZED, 'Action not allowed');
+        throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');
       }
 
       next();
