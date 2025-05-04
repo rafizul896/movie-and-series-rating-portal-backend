@@ -37,7 +37,11 @@ const getAllMovie = catchAsync(async (req: Request, res: Response) => {
 
 const getAMovie = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await movieService.getAMovie(id);
+  const userId = req?.body?.userId;
+
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+  const result = await movieService.getAMovie(id,options,userId);
 
   sendResponse(res, {
     statusCode: status.CREATED,
