@@ -7,6 +7,7 @@ const commentRoutes = Router();
 
 
 commentRoutes.post("/",auth(UserRole.USER, UserRole.ADMIN), commentsController.addAComment)
+commentRoutes.get("/", commentsController.getUnApprovedComments)
 commentRoutes.get("/:reviewId", commentsController.getCommentsByReview)
 
 export default commentRoutes;

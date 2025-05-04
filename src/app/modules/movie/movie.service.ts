@@ -228,7 +228,7 @@ const getAMovie = async (
     meta: {
       page,
       limit,
-      total,
+      TotalReview:total,
     },
     data: result,
   };
