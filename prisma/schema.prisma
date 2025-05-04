@@ -22,19 +22,20 @@ model User {
   comments   Comment[]
   likes      Like[]
   watchlists Watchlist[]
+  wishlists  Wishlist[]
   purchase   Purchase[]
 
   @@map("users")
 }
 
 model Movie {
-  id            String    @id @default(uuid())
+  id            String      @id @default(uuid())
   title         String
   synopsis      String
   genres        String[]
-  type          MediaType @default(MOVIE)
+  type          MediaType   @default(MOVIE)
   releaseYear   Int
-  isDeleted     Boolean   @default(false)
+  isDeleted     Boolean     @default(false)
   director      String
   cast          String[]
   platforms     String[]
@@ -53,6 +54,7 @@ model Movie {
 
   watchlists Watchlist[]
   purchase   Purchase[]
+  wishlists     Wishlist[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
@@ -116,12 +118,28 @@ model Watchlist {
   id      String @id @default(uuid())
   userId  String
   movieId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users  User  @relation(fields: [userId], references: [id])
   movies Movie @relation(fields: [movieId], references: [id])
 
   @@unique([userId, movieId])
   @@map("watchlists")
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  User  @relation(fields: [userId], references: [id])
+  movies Movie @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])
+  @@map("wishlists")
 }
 
 model Purchase {
