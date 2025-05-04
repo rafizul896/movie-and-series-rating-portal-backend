@@ -45,12 +45,18 @@ model Movie {
   thumbnail     String
   streamingLink String
   reviews       Review[]
-  isTrending    Boolean     @default(false)
-  watchlists    Watchlist[]
+  isTrending    Boolean   @default(false)
+
+  totalRating Int @default(0)
+  avgRating   Float @default(0.0)
+  reviewCount Int   @default(0)
+  likesCount  Int   @default(0)
+
+  watchlists Watchlist[]
+  purchase   Purchase[]
   wishlists     Wishlist[]
-  purchase      Purchase[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("movies")
 }
