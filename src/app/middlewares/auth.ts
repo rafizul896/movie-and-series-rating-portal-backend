@@ -30,11 +30,12 @@ const auth = (...roles: string[]) => {
       const userData = await prisma.user.findUnique({
         where: {
           email: verifyUser.email,
+          status: UserStatus.ACTIVE,
         },
       });
 
-      if (userData?.status !== UserStatus.ACTIVE) {
-        throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');
+      if (userData) {
+        throw new AppError(status.NOT_FOUND, 'User is Not Found!');
       }
 
       next();
