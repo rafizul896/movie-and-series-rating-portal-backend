@@ -50,9 +50,34 @@ const deletePurchase = catchAsync(async (req, res) => {
   });
 });
 
+const getPurchaseAnalytics = catchAsync(async (req, res) => {
+  const result = await PurchaseServices.getPurchaseAnalytics(req.query);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Purchase analytics retrieved successfully',
+    data: result,
+  });
+});
+
+const getMovieWiseSales = catchAsync(async (req, res) => {
+  const result = await PurchaseServices.getMovieWiseSales(req.query);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'MovieWise Sales retrieved successfully',
+    data: result.movieWiseSales,
+    meta: result.meta,
+  });
+});
+
 export const PurchaseControllers = {
   createPurchase,
   getPurchasesByUser,
   updatePurchase,
   deletePurchase,
+  getPurchaseAnalytics,
+  getMovieWiseSales,
 };

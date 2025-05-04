@@ -1,6 +1,8 @@
 import { Comment, User, UserStatus } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
+import { IPaginationOptions } from '../../interface/pagination';
+import { paginationHelper } from '../../helpers/paginationHelpers';
 
 const addAComment = async (user: Partial<User>, payload: Comment) => {
   const result = await prisma.$transaction(async (tx) => {
@@ -64,7 +66,74 @@ const getCommentsByReview = async (reviewId: string) => {
 
   return comments;
 };
+
+// get all unapproved comment data based on filter
+const getUnApprovedComments = async (
+  options: IPaginationOptions,
+) => {
+
+  const whereCondition = {
+    approved: false 
+  };
+
+
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+
+  const result = await prisma.comment.findMany({
+    where: whereCondition,
+    include: {
+      review: true,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: 'desc' },
+  });
+
+  // Count total comments for pagination
+  const total = await prisma.comment.count({
+    where: whereCondition,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+// const getApprovedComments = async (user: Partial<User>, co: string) => {
+
+//   const result = await prisma.$transaction(async (tx) => {
+//     const review = await tx.comment.findFirst({
+//       where: { id: co },
+//     });
+
+//     if (!review) {
+//       throw new AppError(403, 'Review not found');
+//     }
+
+//     const updatedReview = await tx.review.update({
+//       where: { id: review.id },
+//       data: { 
+//         approved: review.approved === false ? true : false,},
+//     });
+
+//     return updatedReview;
+//   });
+
+
+//   return result;
+// };
+
+
 export const commentService = {
   addAComment,
   getCommentsByReview,
+  getUnApprovedComments
 };
