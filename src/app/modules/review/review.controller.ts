@@ -3,6 +3,9 @@ import catchAsync from '../../utils/catchAsync';
 import {  reviewService } from './review.service';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
+import { User } from '@prisma/client';
+import { ReviewFilter } from './review.interface';
+import pick from '../../shared/pick';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
   const result = await reviewService.createReview(req.body);
@@ -49,7 +52,7 @@ const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
 });
 
 const editReview = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user as User;
 const { reviewId } = req.params;
   const result = await reviewService.editReview(user,reviewId, req.body);
 
@@ -62,20 +65,35 @@ const { reviewId } = req.params;
 });
 
 const approvedReview = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req.user as User;
 const { id } = req.params;
   const result = await reviewService.approvedReview(user,id);
 
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Approved review successfully',
+    message: 'Review approved successfully',
+    data: result,
+  });
+});
+
+const getReviews = catchAsync(async (req: Request, res: Response) => {
+const filterOptions  = req?.query?.filter as ReviewFilter;
+
+const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+  const result = await reviewService.getReviews(filterOptions, options);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: `Retrieve ${filterOptions} reviews successfully`,
     data: result,
   });
 });
 
 const deleteReview = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = req?.user as User;
 const { id } = req.params;
   const result = await reviewService.deleteReview(user,id);
 
@@ -87,40 +105,6 @@ const { id } = req.params;
   });
 });
 
-// const getAllMovie = catchAsync(async (req: Request, res: Response) => {
-//   const result = await movieService.getAllMovie();
-
-//   sendResponse(res, {
-//     statusCode: status.CREATED,
-//     success: true,
-//     message: 'Fetch all movie successfully',
-//     data: result,
-//   });
-// });
-
-// const updateAMovie = catchAsync(async (req: Request, res: Response) => {
-//   const { id } = req.params;
-//   const result = await movieService.updateAMovie(id, req.body);
-
-//   sendResponse(res, {
-//     statusCode: status.CREATED,
-//     success: true,
-//     message: "updated movie successfully",
-//     data: result,
-//   });
-// });
-
-// const deleteAMovie = catchAsync(async (req: Request, res: Response) => {
-//   const { id } = req.params;
-//   const result = await movieService.deleteAMovie(id);
-
-//   sendResponse(res, {
-//     statusCode: status.CREATED,
-//     success: true,
-//     message: "Movie deleted successfully",
-//     data: result,
-//   });
-// });
 export const reviewController = {
   createReview,
   getSingleReview,
@@ -128,5 +112,6 @@ export const reviewController = {
   getReviewsByMovieId,
   editReview,
   approvedReview,
-  deleteReview
+  deleteReview,
+  getReviews
 };
