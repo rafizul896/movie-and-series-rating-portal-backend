@@ -5,6 +5,7 @@ import AppError from '../../error/AppError';
 import { ReviewFilter } from './review.interface';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
+import { updateMovieReviewRatingStats } from '../movie/movie.utils';
 
 const createReview = async (user: Partial<User>, payload: Review) => {
   
@@ -194,39 +195,41 @@ const editReview = async (
 };
 
 const approvedReview = async (user: Partial<User>, reviewId: string) => {
+  let movieId: string = '';
+
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Find the review
     const review = await tx.review.findFirst({
-      where: {
-        id: reviewId,
-      },
+      where: { id: reviewId },
     });
 
     if (!review) {
       throw new AppError(403, 'Review not found');
     }
 
-    // 2. check if the review is published or not
-    if (review?.approved === true) {
+    if (review.approved === true) {
       throw new AppError(403, 'The review is already approved');
     }
 
-    // 3. update the review
+    movieId = review.movieId; // Save for later use
+
     const updatedReview = await tx.review.update({
-      where: {
-        id: review.id,
-      },
-      data: {
-        approved: true,
-      },
+      where: { id: review.id },
+      data: { approved: true },
     });
 
     return updatedReview;
   });
+
+  // Update movie stats outside the transaction
+  await updateMovieReviewRatingStats(movieId);
+
   return result;
 };
 
+
 const deleteReview = async (user: Partial<User>, reviewId: string) => {
+  let movieId: string = '';
+
   const result = await prisma.$transaction(async (tx) => {
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { email: user?.email },
@@ -237,7 +240,7 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
     const review = await tx.review.findFirst({
       where: {
         id: reviewId,
-        ...(isAdmin ? {} : { userId: checkUser.id }), // if not admin then check userID!
+        ...(isAdmin ? {} : { userId: checkUser.id }),
       },
     });
 
@@ -249,13 +252,18 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
       throw new AppError(403, 'You cannot delete an approved review');
     }
 
-    // 3. delete the review
+    movieId = review.movieId;
+
     return await tx.review.delete({
       where: { id: review.id },
     });
   });
+
+  await updateMovieReviewRatingStats(movieId);
+
   return result;
 };
+
 
 export const reviewService = {
   createReview,

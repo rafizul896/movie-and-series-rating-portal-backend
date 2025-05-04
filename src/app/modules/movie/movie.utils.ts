@@ -1,11 +1,13 @@
 import prisma from "../../shared/prisma";
 
 export const updateMovieReviewRatingStats = async (movieId: string) => {
-  console.log("movieId", movieId);
   const stats = await prisma.review.aggregate({
     where: {
       movieId,
       approved: true,
+    },
+    _sum: {
+      rating: true,
     },
     _avg: {
       rating: true,
@@ -14,10 +16,10 @@ export const updateMovieReviewRatingStats = async (movieId: string) => {
       id: true,
     },
   });
-console.log("stats", stats);
   await prisma.movie.update({
     where: { id: movieId },
     data: {
+      totalRating: stats._sum.rating ?? 0,
       avgRating: stats._avg.rating ?? 0,
       reviewCount: stats._count.id,
     },
