@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Review, User, UserRole } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
