@@ -40,6 +40,8 @@ model Movie {
   platforms     String[]
   buyPrice      Float
   rentPrice     Float
+  discountPrice  Float?
+  thumbnail     String
   streamingLink String
   reviews       Review[]
   isTrending     Boolean  @default(false)
@@ -51,7 +53,6 @@ model Movie {
   @@map("movies")
 }
 
-// onUpdate: Cascade, onDelete: Cascade
 model Review {
   id         String   @id @default(uuid())
   rating     Int
@@ -77,9 +78,11 @@ model Review {
 
 model Comment {
   id      String @id @default(uuid())
+  approved   Boolean  @default(false)
   content String
   user    User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId  String
+
 
   review   Review @relation(fields: [reviewId], references: [id])
   reviewId String
@@ -100,7 +103,7 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, reviewId]) // Ensures one like per user per review
+  @@unique([userId, reviewId])
   @@map("likes")
 }
 
