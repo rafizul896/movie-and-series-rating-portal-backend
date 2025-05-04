@@ -34,10 +34,10 @@ const auth = (...roles: string[]) => {
         },
       });
 
-      if (userData) {
+      if (!userData) {
         throw new AppError(status.NOT_FOUND, 'User is Not Found!');
       }
-
+console.log('User data:', userData)
       next();
     } catch (err) {
       next(err);

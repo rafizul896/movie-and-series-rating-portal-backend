@@ -45,6 +45,11 @@ model Movie {
   streamingLink String
   reviews       Review[]
   isTrending     Boolean  @default(false)
+
+  avgRating     Float     @default(0.0)
+  reviewCount   Int       @default(0)
+  likesCount    Int       @default(0)
+  
   watchlists      Watchlist[]
   purchase      Purchase[]
   createdAt     DateTime @default(now())

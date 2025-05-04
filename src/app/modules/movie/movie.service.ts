@@ -8,6 +8,7 @@ import { movieFilterableFields } from './movie.const';
 import AppError from '../../error/AppError';
 
 const addAMovie = async (movieData: Movie) => {
+
   const result = await prisma.movie.create({
     data: movieData,
   });

@@ -8,7 +8,8 @@ import { ReviewFilter } from './review.interface';
 import pick from '../../shared/pick';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
-  const result = await reviewService.createReview(req.body);
+  const user = req?.user as User;
+  const result = await reviewService.createReview(user,req.body);
 
   sendResponse(res, {
     statusCode: status.CREATED,

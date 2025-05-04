@@ -6,7 +6,8 @@ import { ReviewFilter } from './review.interface';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 
-const createReview = async (payload: Review) => {
+const createReview = async (user: Partial<User>, payload: Review) => {
+  
   const result = await prisma.$transaction(async (tx) => {
     // 1. Check if the movie exists
     const movieExists = await tx.movie.findUnique({
@@ -20,27 +21,38 @@ const createReview = async (payload: Review) => {
     const existingReview = await tx.review.findFirst({
       where: {
         movieId: payload.movieId,
-        userId: payload.userId,
-        approved: false, // Check for unapproved reviews
+        userId: user.id!,
       },
     });
-    if (existingReview) {
+
+    if (existingReview && existingReview.approved === false) {
       throw new AppError(
         409,
         'You have already submitted a review for this movie.',
+      );
+    } else if (existingReview && existingReview.approved === true) {
+      throw new AppError(
+        409,
+        'You have to wait for the admin to approve your review.',
       );
     }
 
     // 3. Create the review
     const createdReview = await tx.review.create({
-      data: payload,
+      data: {
+        ...payload,
+        userId: user.id!,
+      },
     });
 
+    // // 4. Update the movie's average rating and review count
+    // await updateMovieReviewRatingStats(movieExists?.id);
     return createdReview;
   });
 
   return result;
 };
+
 
 const getSingleReview = async (reviewId: string) => {
   const result = await prisma.review.findUniqueOrThrow({
