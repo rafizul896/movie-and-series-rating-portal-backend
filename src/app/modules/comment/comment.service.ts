@@ -213,7 +213,7 @@ const editComment = async (
       where: {
         id: comment.id,
       },
-      data: existingComment,
+      data: {...existingComment,approved: false},
     });
 
     return updatedComment;

@@ -203,7 +203,7 @@ const editReview = async (
       where: {
         id: review.id,
       },
-      data: existingReview,
+      data: {...existingReview,approved: false},
     });
 
     return updatedReview;
