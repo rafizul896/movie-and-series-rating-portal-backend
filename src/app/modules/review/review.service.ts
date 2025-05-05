@@ -131,6 +131,7 @@ const getReviews = async (
 
   // Build comment filter condition (only if review is approved)
   let commentWhere: any = undefined;
+
   if (filterReview === 'approved') {
     if (filterComment === 'approved') {
       commentWhere = { approved: true };
@@ -152,11 +153,32 @@ const getReviews = async (
       content: true,
       approved: true,
       createdAt: true,
+      movie: {
+        select: {
+          id: true,
+          title: true,
+          thumbnail: true,
+          streamingLink: true,
+        },
+      },
       comments: commentWhere
         ? {
             where: commentWhere,
+            select: {
+              id: true,
+              content: true,
+              approved: true,
+              createdAt: true,
+            },
           }
-        : true,
+        : {
+            select: {
+              id: true,
+              content: true,
+              approved: true,
+              createdAt: true,
+            },
+          },
     },
   });
 
@@ -204,7 +226,7 @@ const editReview = async (
       where: {
         id: review.id,
       },
-      data: {...existingReview,approved: false},
+      data: { ...existingReview, approved: false },
     });
 
     return updatedReview;
@@ -212,7 +234,10 @@ const editReview = async (
   return result;
 };
 
-const approvedUnApprovedReview = async (user: Partial<User>, reviewId: string) => {
+const approvedUnApprovedReview = async (
+  user: Partial<User>,
+  reviewId: string,
+) => {
   let movieId: string = '';
 
   const result = await prisma.$transaction(async (tx) => {
