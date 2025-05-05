@@ -10,4 +10,6 @@ commentRoutes.post("/",auth(UserRole.USER, UserRole.ADMIN), commentsController.a
 commentRoutes.get("/", commentsController.getUnApprovedComments)
 commentRoutes.get("/:reviewId", commentsController.getCommentsByReview)
 
+commentRoutes.patch("/approve-toggle",auth(UserRole.ADMIN), commentsController.approvedUnapprovedComments)
+
 export default commentRoutes;

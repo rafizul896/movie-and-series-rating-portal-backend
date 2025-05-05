@@ -42,8 +42,23 @@ const getUnApprovedComments = catchAsync(async (req: Request, res: Response) => 
       data: result,
     });
   });
+
+
+const approvedUnapprovedComments = catchAsync(async (req: Request, res: Response) => {
+  
+  const commentIds = req.body.commentIds as string[];
+    const result = await commentService.approvedUnApprovedComments(commentIds);
+  
+    sendResponse(res, {
+      statusCode: status.CREATED,
+      success: true,
+      message: `Retrieve  comments successfully`, // ${result?.approved === true ? 'approved': 'unapproved'}
+      data: result,
+    });
+  });
 export const commentsController = {
   addAComment,
   getCommentsByReview,
-  getUnApprovedComments
+  getUnApprovedComments,
+  approvedUnapprovedComments
 };

@@ -64,15 +64,15 @@ const { reviewId } = req.params;
   });
 });
 
-const approvedReview = catchAsync(async (req: Request, res: Response) => {
+const approvedUnApprovedReview = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as User;
 const { id } = req.params;
-  const result = await reviewService.approvedReview(user,id);
+  const result = await reviewService.approvedUnApprovedReview(user,id);
 
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Review approved successfully',
+    message: `Review ${result?.approved === true ? 'approved': 'unapproved'} successfully`,
     data: result,
   });
 });
@@ -113,7 +113,7 @@ export const reviewController = {
   getAllReview,
   getReviewsByMovieId,
   editReview,
-  approvedReview,
+  approvedUnApprovedReview,
   deleteReview,
   getReviews
 };

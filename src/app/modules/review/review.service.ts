@@ -211,7 +211,7 @@ const editReview = async (
   return result;
 };
 
-const approvedReview = async (user: Partial<User>, reviewId: string) => {
+const approvedUnApprovedReview = async (user: Partial<User>, reviewId: string) => {
   let movieId: string = '';
 
   const result = await prisma.$transaction(async (tx) => {
@@ -292,7 +292,7 @@ export const reviewService = {
   getAllReview,
   getReviewsByMovieId,
   editReview,
-  approvedReview,
+  approvedUnApprovedReview,
   deleteReview,
   getReviews,
 };

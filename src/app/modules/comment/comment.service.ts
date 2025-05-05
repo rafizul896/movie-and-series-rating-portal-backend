@@ -68,7 +68,7 @@ const getCommentsByReview = async (reviewId: string) => {
   return comments;
 };
 
-// get all unapproved comment data based on filter
+// get all unapproved comment data based on filter (optional )
 const getUnApprovedComments = async (
   options: IPaginationOptions,
 ) => {
@@ -108,33 +108,35 @@ const getUnApprovedComments = async (
   };
 };
 
-// const getApprovedComments = async (user: Partial<User>, co: string) => {
+// Approve/Unpublish Comments
+const approvedUnApprovedComments = async (commentsId:string[] ) => {
 
-//   const result = await prisma.$transaction(async (tx) => {
-//     const review = await tx.comment.findFirst({
-//       where: { id: co },
-//     });
+  console.log(commentsId, 'commentsId')
+  // const result = await prisma.$transaction(async (tx) => {
+  //   const review = await tx.review.findFirst({
+  //     where: { id: reviewId },
+  //   });
 
-//     if (!review) {
-//       throw new AppError(403, 'Review not found');
-//     }
+  //   if (!review) {
+  //     throw new AppError(403, 'Review not found');
+  //   }
 
-//     const updatedReview = await tx.review.update({
-//       where: { id: review.id },
-//       data: { 
-//         approved: review.approved === false ? true : false,},
-//     });
+  //   const updatedReview = await tx.review.update({
+  //     where: { id: review.id },
+  //     data: {
+  //       approved: review.approved === false ? true : false,
+  //     },
+  //   });
 
-//     return updatedReview;
-//   });
+  //   return updatedReview;
+  // });
 
-
-//   return result;
-// };
-
+  // return result;
+};
 
 export const commentService = {
   addAComment,
   getCommentsByReview,
-  getUnApprovedComments
+  getUnApprovedComments,
+  approvedUnApprovedComments
 };
