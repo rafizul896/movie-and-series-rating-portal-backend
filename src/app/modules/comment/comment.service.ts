@@ -1,4 +1,4 @@
-import { Comment, User, UserStatus } from '@prisma/client';
+import { Comment, User, UserRole, UserStatus } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 import { IPaginationOptions } from '../../interface/pagination';
@@ -139,23 +139,85 @@ const approvedUnApprovedComments = async (commentsId: string[]) => {
 };
 
 
-const deleteComments = async (commentIds: string[]) => {
+const deleteComments = async (user: Partial<User>,commentIds: string[]) => {
   if (!commentIds || commentIds.length === 0) {
     throw new Error('No comment IDs provided.');
   }
-
   const result = await prisma.$transaction(async (tx) => {
-    await tx.comment.deleteMany({
+
+    const checkUser = await tx.user.findUniqueOrThrow({
+      where: { id: user?.id },
+    });
+
+    const isAdmin = checkUser.role === UserRole.ADMIN;
+
+    // check if the comments exist
+    const comments = await tx.comment.findMany({
       where: {
         id: {
           in: commentIds,
         },
+        ...(isAdmin ? {} : { userId: checkUser.id }),
+      }
+    })
+
+    if (!comments || comments.length === 0) {
+      throw new AppError(404, 'Comments not found');
+    }
+    
+
+    const deletedComments = await Promise.all(
+      comments.map(async(comment) => {
+        return await tx.comment.delete({
+          where: {
+            id: comment.id
+          }
+        })
+      })
+    )
+
+    return deletedComments;
+  });
+
+  return result;
+};
+
+
+// edit comments by user if the comments is not approved
+const editComment = async (
+  user: Partial<User>,
+  commentID: string,
+  payload: any,
+) => {
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Find the comment that belongs to the user and is not yet approved
+    const comment = await tx.comment.findFirst({
+      where: {
+        id: commentID,
+        userId: user?.id,
       },
     });
 
-    return { message: 'Selected comments have been deleted.' };
-  });
+    if (!comment) {
+      throw new AppError(403, 'Comment not found');
+    }
 
+    // 2. check if the review is published or not
+    if (comment?.approved === true) {
+      throw new AppError(403, 'You cannot edit an approved comment');
+    }
+    const { approved, ...existingComment } = payload;
+
+    // 3. update the comment
+    const updatedComment = await tx.comment.update({
+      where: {
+        id: comment.id,
+      },
+      data: existingComment,
+    });
+
+    return updatedComment;
+  });
   return result;
 };
 
@@ -164,4 +226,6 @@ export const commentService = {
   getCommentsByReview,
   getUnApprovedComments,
   approvedUnApprovedComments,
+  deleteComments,
+  editComment
 };

@@ -59,7 +59,7 @@ const { reviewId } = req.params;
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Retrieve reviews data by movieId successfully',
+    message: 'Review edited successfully',
     data: result,
   });
 });
