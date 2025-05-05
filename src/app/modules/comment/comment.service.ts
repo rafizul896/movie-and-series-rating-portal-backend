@@ -31,6 +31,7 @@ const addAComment = async (user: Partial<User>, payload: Comment) => {
     const comment = await tx.comment.create({
       data: {
         ...payload,
+        approved: false,
         userId: userExists.id,
       },
     });

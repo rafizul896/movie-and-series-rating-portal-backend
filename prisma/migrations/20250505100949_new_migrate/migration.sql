@@ -46,6 +46,10 @@ CREATE TABLE "movies" (
     "thumbnail" TEXT NOT NULL,
     "streamingLink" TEXT NOT NULL,
     "isTrending" BOOLEAN NOT NULL DEFAULT false,
+    "totalRating" INTEGER NOT NULL DEFAULT 0,
+    "avgRating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "reviewCount" INTEGER NOT NULL DEFAULT 0,
+    "likesCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

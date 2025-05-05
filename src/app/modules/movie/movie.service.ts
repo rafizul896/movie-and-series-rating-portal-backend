@@ -4,7 +4,7 @@ import prisma from '../../shared/prisma';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
-import { movieFilterableFields } from './movie.const';
+import { movieFilterableFields, movieSearchAbleFields } from './movie.const';
 import AppError from '../../error/AppError';
 
 const addAMovie = async (movieData: Movie) => {
@@ -39,7 +39,7 @@ const getAllMovie = async (
 
   if (params?.searchTerm) {
     andConditions.push({
-      OR: movieFilterableFields.map(({ field, operator }) => {
+      OR: movieSearchAbleFields.map(({ field, operator }) => {
         if (operator === 'equals') {
           const numericValue =
             typeof searchTerm === 'number'
@@ -126,13 +126,6 @@ const getAllMovie = async (
     },
     data: result,
   };
-
-  // const result = await prisma.movie.findMany({
-  //   where: {
-  //     isDeleted: false,
-  //   },
-  // });
-  // return result;
 };
 
 const getAMovie = async (
