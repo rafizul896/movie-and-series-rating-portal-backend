@@ -1,3 +1,5 @@
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Comment, User, UserRole, UserStatus } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
@@ -206,6 +208,7 @@ const editComment = async (
     if (comment?.approved === true) {
       throw new AppError(403, 'You cannot edit an approved comment');
     }
+    // eslint-disable-next-line no-unused-vars
     const { approved, ...existingComment } = payload;
 
     // 3. update the comment
