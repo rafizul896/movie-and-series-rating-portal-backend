@@ -33,27 +33,13 @@ export const addMovieSchema = z.object({
   }),
 });
 
-export const updateMovieSchema = z.object({
-  body: z.object({
-    title: z.string().optional(),
-    synopsis: z.string().optional(),
-    genres: z.array(z.string()).optional(),
-    type: z.enum(['MOVIE', 'SERIES']).optional(),
-    releaseYear: z.number().optional(),
-    isDeleted: z.boolean().optional(),
-    director: z.string().optional(),
-    cast: z.array(z.string()).optional(),
-    platforms: z.array(z.string()).optional(),
-    buyPrice: z.number().optional(),
-    rentPrice: z.number().optional(),
-    discountPrice: z.number().optional(),
-    thumbnail: z.string().optional(),
-    streamingLink: z.string().optional(),
-    isTrending: z.boolean().optional(),
-  }),
+export const CommentApprovalSchema = z.object({
+  commentsId: z.array(z.string({
+    required_error: "Comment ID must be a string",
+  })).nonempty("At least one comment ID is required")
 });
 
-export const MovieValidation = {
+export const CommentsValidation = {
   addMovieSchema,
-  updateMovieSchema
+  CommentApprovalSchema
 };

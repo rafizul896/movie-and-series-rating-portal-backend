@@ -69,14 +69,10 @@ const getCommentsByReview = async (reviewId: string) => {
 };
 
 // get all unapproved comment data based on filter (optional )
-const getUnApprovedComments = async (
-  options: IPaginationOptions,
-) => {
-
+const getUnApprovedComments = async (options: IPaginationOptions) => {
   const whereCondition = {
-    approved: false 
+    approved: false,
   };
-
 
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
 
@@ -109,34 +105,63 @@ const getUnApprovedComments = async (
 };
 
 // Approve/Unpublish Comments
-const approvedUnApprovedComments = async (commentsId:string[] ) => {
+const approvedUnApprovedComments = async (commentsId: string[]) => {
 
-  console.log(commentsId, 'commentsId')
-  // const result = await prisma.$transaction(async (tx) => {
-  //   const review = await tx.review.findFirst({
-  //     where: { id: reviewId },
-  //   });
+  const result = await prisma.$transaction(async (tx) => {
+    const comments = await tx.comment.findMany({
+      where: {
+        id: {
+          in: commentsId,
+        },
+      },
+    });
 
-  //   if (!review) {
-  //     throw new AppError(403, 'Review not found');
-  //   }
+    if (!comments || comments.length === 0) {
+      throw new AppError(403, 'Comments not found');
+    }
 
-  //   const updatedReview = await tx.review.update({
-  //     where: { id: review.id },
-  //     data: {
-  //       approved: review.approved === false ? true : false,
-  //     },
-  //   });
+    // Toggle each comment's approval
+    const updatedComments = await Promise.all(
+      comments.map(async (comment) => {
+        return await tx.comment.update({
+          where: { id: comment.id },
+          data: {
+            approved: !comment.approved, // toggle logic
+          },
+        });
+      })
+    );
 
-  //   return updatedReview;
-  // });
+    return updatedComments;
+  });
 
-  // return result;
+  return result;
+};
+
+
+const deleteComments = async (commentIds: string[]) => {
+  if (!commentIds || commentIds.length === 0) {
+    throw new Error('No comment IDs provided.');
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.comment.deleteMany({
+      where: {
+        id: {
+          in: commentIds,
+        },
+      },
+    });
+
+    return { message: 'Selected comments have been deleted.' };
+  });
+
+  return result;
 };
 
 export const commentService = {
   addAComment,
   getCommentsByReview,
   getUnApprovedComments,
-  approvedUnApprovedComments
+  approvedUnApprovedComments,
 };
