@@ -123,6 +123,8 @@ const forgotPassword = async (payload: { email: string }) => {
     },
   });
 
+  console.log('user data', userData);
+
   if (!userData) {
     throw new AppError(status.NOT_FOUND, 'Invalid email id');
   }
@@ -156,17 +158,17 @@ const forgotPassword = async (payload: { email: string }) => {
 
 const resetPassword = async (
   token: string,
-  payload: { id: string; password: string },
+  payload: { email: string; password: string },
 ) => {
   const userData = await prisma.user.findUnique({
     where: {
-      id: payload.id,
+      email: payload.email, //there i chaged 
       status: UserStatus.ACTIVE,
     },
   });
 
   if (!userData) {
-    throw new AppError(status.NOT_FOUND, 'Invalid user id');
+    throw new AppError(status.NOT_FOUND, 'User not found');
   }
 
   const isValidToken = verifyToken(
@@ -175,7 +177,7 @@ const resetPassword = async (
   );
 
   if (!isValidToken) {
-    throw new AppError(status.FORBIDDEN, 'Something went wrong.Try again');
+    throw new AppError(status.FORBIDDEN, 'Invalid token');
   }
 
   const hashedPassword = await bcrypt.hash(
@@ -185,7 +187,7 @@ const resetPassword = async (
 
   await prisma.user.update({
     where: {
-      id: payload.id,
+      email: userData.email, //there i chaged 
     },
     data: {
       password: hashedPassword,

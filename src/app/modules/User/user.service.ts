@@ -17,13 +17,11 @@ const createUser = async (data: any) => {
   const result = await prisma.user.create({
     data: userData,
   });
-
   return result;
 };
 
 const getAllUsersFromDB = async () => {
   const result = await prisma.user.findMany();
-
   return result;
 };
 

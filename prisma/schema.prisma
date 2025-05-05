@@ -18,23 +18,23 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  reviews  Review[]
-  comments Comment[]
-  likes    Like[]
+  reviews    Review[]
+  comments   Comment[]
+  likes      Like[]
   watchlists Watchlist[]
-  purchase Purchase[]
+  purchase   Purchase[]
 
   @@map("users")
 }
 
 model Movie {
-  id            String    @id @default(uuid())
+  id            String      @id @default(uuid())
   title         String
   synopsis      String
   genres        String[]
-  type          MediaType @default(MOVIE)
+  type          MediaType   @default(MOVIE)
   releaseYear   Int
-  isDeleted     Boolean   @default(false)
+  isDeleted     Boolean     @default(false)
   director      String
   cast          String[]
   platforms     String[]
@@ -42,11 +42,11 @@ model Movie {
   rentPrice     Float
   streamingLink String
   reviews       Review[]
-  isTrending     Boolean  @default(false)
-  watchlists      Watchlist[]
+  isTrending    Boolean     @default(false)
+  watchlists    Watchlist[]
   purchase      Purchase[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@map("movies")
 }
@@ -105,34 +105,35 @@ model Like {
 }
 
 model Watchlist {
-  id String @id @default(uuid()) 
-  userId String
+  id      String @id @default(uuid())
+  userId  String
   movieId String
 
-  users User @relation(fields: [userId], references: [id])
-  movies Movie @relation(fields: [movieId],references: [id])
-  @@unique([userId,movieId])
+  users  User  @relation(fields: [userId], references: [id])
+  movies Movie @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])
   @@map("watchlists")
 }
 
 model Purchase {
-  id String @id @default(uuid())
-  purchase_type PurchaseType
-  userId String
-  movieId String
-  amount Float
-  currency String
-  paymentStatus PaymentStatus
-  transactionId String
-  purchasedAt DateTime @default(now())
+  id               String        @id @default(uuid())
+  purchase_type    PurchaseType
+  userId           String
+  movieId          String
+  amount           Float
+  currency         String
+  paymentStatus    PaymentStatus
+  transactionId    String
+  purchasedAt      DateTime      @default(now())
   accessExpiryTime DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
-  users User @relation(fields: [userId], references: [id])
+  users User  @relation(fields: [userId], references: [id])
   movie Movie @relation(fields: [movieId], references: [id])
-  @@unique([userId, movieId])
 
+  @@unique([userId, movieId])
   @@map("purchase")
 }
 
