@@ -1,7 +1,0 @@
--- AlterTable
-ALTER TABLE "comments" ADD COLUMN     "approved" BOOLEAN NOT NULL DEFAULT false;
-
--- AlterTable
-ALTER TABLE "movies" ADD COLUMN     "avgRating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-ADD COLUMN     "likesCount" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "reviewCount" INTEGER NOT NULL DEFAULT 0;

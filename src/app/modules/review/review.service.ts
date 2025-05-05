@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Review, User, UserRole } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
-import { ReviewFilter } from './review.interface';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { updateMovieReviewRatingStats } from '../movie/movie.utils';
@@ -41,6 +41,7 @@ const createReview = async (user: Partial<User>, payload: Review) => {
     const createdReview = await tx.review.create({
       data: {
         ...payload,
+        approved: false,
         userId: user.id!,
       },
     });
@@ -173,7 +174,6 @@ const getReviews = async (
   };
 };
 
-
 // edit review by user if the review is not approved
 const editReview = async (
   user: Partial<User>,
@@ -204,7 +204,7 @@ const editReview = async (
       where: {
         id: review.id,
       },
-      data: existingReview,
+      data: {...existingReview,approved: false},
     });
 
     return updatedReview;
@@ -212,7 +212,7 @@ const editReview = async (
   return result;
 };
 
-const approvedReview = async (user: Partial<User>, reviewId: string) => {
+const approvedUnApprovedReview = async (user: Partial<User>, reviewId: string) => {
   let movieId: string = '';
 
   const result = await prisma.$transaction(async (tx) => {
@@ -272,6 +272,10 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
     }
 
     movieId = review.movieId;
+    // Delete related comments first
+    await tx.comment.deleteMany({
+      where: { reviewId: review.id },
+    });
 
     return await tx.review.delete({
       where: { id: review.id },
@@ -289,7 +293,7 @@ export const reviewService = {
   getAllReview,
   getReviewsByMovieId,
   editReview,
-  approvedReview,
+  approvedUnApprovedReview,
   deleteReview,
   getReviews,
 };
