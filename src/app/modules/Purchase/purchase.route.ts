@@ -19,4 +19,28 @@ router.get(
   PurchaseControllers.getPurchasesByUser,
 );
 
+router.patch(
+  '/:id',
+  validationRequest(PurchaseValidation.updatePurchaseZodSchema),
+  PurchaseControllers.updatePurchase,
+);
+
+router.delete(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  PurchaseControllers.deletePurchase,
+);
+
+router.get(
+  '/purchase-analytics',
+  auth(UserRole.ADMIN),
+  PurchaseControllers.getPurchaseAnalytics,
+);
+
+router.get(
+  '/movie-wise-sales',
+  auth(UserRole.ADMIN),
+  PurchaseControllers.getMovieWiseSales,
+);
+
 export const PurchaseRoutes = router;

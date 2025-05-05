@@ -1,5 +1,4 @@
 import status from 'http-status';
-import AppError from '../../errors/AppError';
 import prisma from '../../shared/prisma';
 import bcrypt from 'bcrypt';
 import config from '../../config';
@@ -7,16 +6,18 @@ import { generateToken, verifyToken } from './auth.utils';
 import { UserStatus } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
 import sendEmail from '../../utils/sendEmail';
+import AppError from '../../error/AppError';
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
+      status: UserStatus.ACTIVE,
     },
   });
 
   if (!userData) {
-    throw new AppError(status.UNAUTHORIZED, 'this user is not exist');
+    throw new AppError(status.UNAUTHORIZED, 'This user is not exist');
   }
 
   const isCurrectPassword: boolean = await bcrypt.compare(
@@ -30,6 +31,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
 
   const jwtPayload = {
     email: userData.email,
+    id: userData.id,
     role: userData.role,
   };
 
@@ -69,6 +71,7 @@ const refreshToken = async (token: string) => {
 
   const jwtPayload = {
     email: isUserExists?.email,
+    id: isUserExists?.id,
     role: isUserExists?.role,
   };
 
@@ -129,8 +132,14 @@ const forgotPassword = async (payload: { email: string }) => {
     throw new AppError(status.NOT_FOUND, 'Invalid email id');
   }
 
+  const jwtPayload = {
+    email: userData?.email,
+    id: userData?.id,
+    role: userData?.role,
+  };
+
   const resetPasswordToken = generateToken(
-    { email: userData.email, role: userData.role },
+    jwtPayload,
     config.JWT.JWT_RESET_PASSWORD_SECRET as string,
     config.JWT.JWT_RESET_PASSWORD_EXPIRES_IN,
   );

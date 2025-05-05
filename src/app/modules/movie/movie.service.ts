@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Movie, Prisma, UserStatus } from '@prisma/client';
+import { Movie, Prisma } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
-import { movieFilterableFields } from './movie.const';
-import AppError from '../../errors/AppError';
+import { movieSearchAbleFields } from './movie.const';
+import AppError from '../../error/AppError';
 
 const addAMovie = async (movieData: Movie) => {
   const result = await prisma.movie.create({
@@ -38,7 +38,7 @@ const getAllMovie = async (
 
   if (params?.searchTerm) {
     andConditions.push({
-      OR: movieFilterableFields.map(({ field, operator }) => {
+      OR: movieSearchAbleFields.map(({ field, operator }) => {
         if (operator === 'equals') {
           const numericValue =
             typeof searchTerm === 'number'
@@ -93,6 +93,29 @@ const getAllMovie = async (
     });
   }
 
+  let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
+    createdAt: 'asc',
+  }; // default
+
+  if (options.sortBy) {
+    switch (options.sortBy) {
+      case 'topRated':
+        orderByCondition = { avgRating: 'desc' };
+        break;
+      case 'mostReviewed':
+        orderByCondition = { reviewCount: 'desc' };
+        break;
+      case 'latest':
+        orderByCondition = { createdAt: 'desc' };
+        break;
+      default:
+        if (options.sortOrder) {
+          orderByCondition = { [options.sortBy]: options.sortOrder };
+        }
+        break;
+    }
+  }
+
   andConditions.push({
     isDeleted: false,
   });
@@ -103,14 +126,7 @@ const getAllMovie = async (
     where: whereConditions,
     skip,
     take: limit,
-    orderBy:
-      options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: 'desc',
-          },
+    orderBy: orderByCondition
   });
 
   const total = await prisma.movie.count({
@@ -125,16 +141,33 @@ const getAllMovie = async (
     },
     data: result,
   };
-
-  // const result = await prisma.movie.findMany({
-  //   where: {
-  //     isDeleted: false,
-  //   },
-  // });
-  // return result;
 };
 
-const getAMovie = async (id: string) => {
+const getAMovie = async (
+  id: string,
+  options: IPaginationOptions,
+  userId?: string,
+) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(
+    options || {},
+  );
+
+  //  Step 1: Review condition
+  type ReviewCondition =
+    | { approved: boolean }
+    | { userId: string; approved: boolean };
+
+  const reviewOrConditions: ReviewCondition[] = [{ approved: true }];
+  if (userId) {
+    reviewOrConditions.push({ userId, approved: false });
+  }
+  const reviewWhereConditions = {
+    OR: reviewOrConditions,
+    movieId: id,
+    // user: { status: UserStatus.ACTIVE },
+  };
+
+  //  Step 2: Fetch movie details with paginated reviews
   const result = await prisma.movie.findUnique({
     where: { id, isDeleted: false },
     select: {
@@ -151,18 +184,27 @@ const getAMovie = async (id: string) => {
       rentPrice: true,
       streamingLink: true,
       isTrending: true,
-
+      thumbnail: true,
+      discountPrice: true,
       reviews: {
         where: {
-          approved: true,
-          user: { status: UserStatus.ACTIVE },
+          OR: reviewOrConditions,
+          movieId: id,
         },
+        skip,
+        take: limit,
+        orderBy:
+          options.sortBy && options.sortOrder
+            ? { [options.sortBy]: options.sortOrder }
+            : { createdAt: 'desc' },
         select: {
           id: true,
           rating: true,
           content: true,
           tags: true,
           hasSpoiler: true,
+          approved: true,
+          createdAt: true,
           user: {
             select: {
               id: true,
@@ -180,10 +222,24 @@ const getAMovie = async (id: string) => {
       },
     },
   });
+
   if (!result) {
     throw new AppError(404, 'Movie not found');
   }
-  return result;
+
+  //  Step 3: Count total reviews for pagination
+  const total = await prisma.review.count({
+    where: reviewWhereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      TotalReview: total,
+    },
+    data: result,
+  };
 };
 
 const updateAMovie = async (id: string, payload: any) => {

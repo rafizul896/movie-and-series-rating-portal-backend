@@ -13,4 +13,28 @@ router.get(
   UserControllers.getAllUsersFromDB,
 );
 
+router.get(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  UserControllers.getUserByIdFromDB,
+);
+
+router.patch(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  UserControllers.updateIntoDB,
+);
+
+router.delete(
+  '/:id',
+  auth(UserRole.ADMIN, UserRole.USER),
+  UserControllers.deleteFromDB,
+);
+
+router.delete(
+  '/soft/:id',
+  auth(UserRole.ADMIN, UserRole.USER),
+  UserControllers.softDeleteFromDB,
+);
+
 export const UserRoutes = router;

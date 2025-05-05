@@ -2,11 +2,11 @@ import status from 'http-status';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 
-const createWatchlist = async (payload: {
+const createWishlist = async (payload: {
   userId: string;
   movieId: string;
 }) => {
-  const exist = await prisma.watchlist.findFirst({
+  const exist = await prisma.wishlist.findFirst({
     where: {
       userId: payload.userId,
       movieId: payload.movieId,
@@ -14,24 +14,24 @@ const createWatchlist = async (payload: {
   });
 
   if (exist) {
-    throw new AppError(status.CONFLICT, 'Already in watchlist!');
+    throw new AppError(status.CONFLICT, 'Already in wishlist!');
   }
 
-  const result = await prisma.watchlist.create({
+  const result = await prisma.wishlist.create({
     data: payload,
   });
 
   return result;
 };
 
-const getAllWatchlistByUser = async (email: string) => {
+const getAllWishlistByUser = async (email: string) => {
   const userData = await prisma.user.findUnique({
     where: {
       email,
     },
   });
 
-  const result = await prisma.watchlist.findMany({
+  const result = await prisma.wishlist.findMany({
     where: {
       userId: userData?.id,
     },
@@ -40,8 +40,8 @@ const getAllWatchlistByUser = async (email: string) => {
   return result;
 };
 
-const deleteWatchlistItem = async (id: string) => {
-  const result = await prisma.watchlist.delete({
+const deleteWishlistItem = async (id: string) => {
+  const result = await prisma.wishlist.delete({
     where: {
       id,
     },
@@ -50,8 +50,8 @@ const deleteWatchlistItem = async (id: string) => {
   return result;
 };
 
-export const WatchlistServices = {
-  createWatchlist,
-  getAllWatchlistByUser,
-  deleteWatchlistItem,
+export const wishlistServices = {
+  createWishlist,
+  getAllWishlistByUser,
+  deleteWishlistItem,
 };

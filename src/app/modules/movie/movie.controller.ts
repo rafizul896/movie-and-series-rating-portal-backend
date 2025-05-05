@@ -11,7 +11,7 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Add new movie successfully',
+    message: 'Movie added successfully',
     data: result,
   });
 });
@@ -37,7 +37,11 @@ const getAllMovie = catchAsync(async (req: Request, res: Response) => {
 
 const getAMovie = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await movieService.getAMovie(id);
+  const userId = req?.body?.userId;
+
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+  const result = await movieService.getAMovie(id,options,userId);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -53,7 +57,7 @@ const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Movie updated  successfully',
+    message: 'Movie updated successfully',
     data: result,
   });
 });

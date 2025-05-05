@@ -22,6 +22,7 @@ model User {
   comments   Comment[]
   likes      Like[]
   watchlists Watchlist[]
+  wishlists  Wishlist[]
   purchase   Purchase[]
 
   @@map("users")
@@ -40,18 +41,26 @@ model Movie {
   platforms     String[]
   buyPrice      Float
   rentPrice     Float
+  discountPrice Float?
+  thumbnail     String
   streamingLink String
   reviews       Review[]
-  isTrending    Boolean     @default(false)
-  watchlists    Watchlist[]
-  purchase      Purchase[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  isTrending    Boolean   @default(false)
+
+  totalRating Int @default(0)
+  avgRating   Float @default(0.0)
+  reviewCount Int   @default(0)
+  likesCount  Int   @default(0)
+
+  watchlists Watchlist[]
+  purchase   Purchase[]
+  wishlists     Wishlist[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("movies")
 }
 
-// onUpdate: Cascade, onDelete: Cascade
 model Review {
   id         String   @id @default(uuid())
   rating     Int
@@ -76,10 +85,11 @@ model Review {
 }
 
 model Comment {
-  id      String @id @default(uuid())
-  content String
-  user    User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  userId  String
+  id       String  @id @default(uuid())
+  approved Boolean @default(false)
+  content  String
+  user     User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId   String
 
   review   Review @relation(fields: [reviewId], references: [id])
   reviewId String
@@ -100,7 +110,7 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, reviewId]) // Ensures one like per user per review
+  @@unique([userId, reviewId])
   @@map("likes")
 }
 
@@ -108,12 +118,28 @@ model Watchlist {
   id      String @id @default(uuid())
   userId  String
   movieId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users  User  @relation(fields: [userId], references: [id])
   movies Movie @relation(fields: [movieId], references: [id])
 
   @@unique([userId, movieId])
   @@map("watchlists")
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  User  @relation(fields: [userId], references: [id])
+  movies Movie @relation(fields: [movieId], references: [id])
+
+  @@unique([userId, movieId])
+  @@map("wishlists")
 }
 
 model Purchase {

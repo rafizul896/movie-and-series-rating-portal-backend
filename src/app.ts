@@ -4,7 +4,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './app/routes';
 import { globalErrorHandler } from './app/error/globalErrorHandler';
-
 const app: Application = express();
 
 const corseOptions = {
