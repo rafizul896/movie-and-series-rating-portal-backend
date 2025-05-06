@@ -33,13 +33,13 @@ router.delete(
 
 router.get(
   '/purchase-analytics',
-  auth(UserRole.ADMIN),
+  // auth(UserRole.ADMIN),
   PurchaseControllers.getPurchaseAnalytics,
 );
 
 router.get(
   '/movie-wise-sales',
-  auth(UserRole.ADMIN),
+  // auth(UserRole.ADMIN),
   PurchaseControllers.getMovieWiseSales,
 );
 
