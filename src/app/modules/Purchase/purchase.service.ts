@@ -78,7 +78,7 @@ const getPurchaseAnalytics = async (filter: AnalyticsFilter = {}) => {
     };
   }
 
-  const [totalPurchases, totalRevenueAgg, rentalCount, buyCount, recentSales] =
+  const [totalPurchases, totalRevenueAgg, rentalCount, buyCount] =
     await Promise.all([
       prisma.purchase.count({ where: dateFilter }),
 
@@ -100,24 +100,6 @@ const getPurchaseAnalytics = async (filter: AnalyticsFilter = {}) => {
           purchase_type: 'BUY',
         },
       }),
-
-      prisma.purchase.findMany({
-        take: 5,
-        orderBy: { purchasedAt: 'desc' },
-        include: {
-          users: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-          movie: {
-            select: {
-              title: true,
-            },
-          },
-        },
-      }),
     ]);
 
   return {
@@ -125,17 +107,11 @@ const getPurchaseAnalytics = async (filter: AnalyticsFilter = {}) => {
     totalPurchases,
     rentalCount,
     buyCount,
-    recentSales: recentSales.map((purchase) => ({
-      name: purchase.users?.name || 'Anonymous',
-      email: purchase.users?.email || '',
-      amount: purchase.amount,
-      movieTitle: purchase.movie?.title || 'Unknown',
-    })),
   };
 };
 
 const getMovieWiseSales = async (query: any) => {
-  const { startDate, endDate } = query;
+  const { startDate, endDate, searchTerm } = query;
   const page = Number(query?.page) || 1;
   const pageSize = Number(query?.pageSize) || 10;
 
@@ -153,42 +129,93 @@ const getMovieWiseSales = async (query: any) => {
     _sum: { amount: true },
   });
 
-  // Fetch movie titles for each grouped movieId
   const movieIds = groupedMovieSales.map((item) => item.movieId);
 
   const movieData = await prisma.movie.findMany({
-    where: { id: { in: movieIds } },
+    where: {
+      id: { in: movieIds },
+      ...(searchTerm && {
+        title: {
+          contains: searchTerm,
+          mode: 'insensitive',
+        },
+      }),
+    },
     select: { id: true, title: true },
   });
 
-  const movieTitleMap = movieData.reduce(
-    (acc, movie) => {
-      acc[movie.id] = movie.title;
-      return acc;
-    },
-    {} as Record<string, string>,
+  const filteredMovieIds = movieData.map((movie) => movie.id);
+  const movieTitleMap = movieData.reduce((acc, movie) => {
+    acc[movie.id] = movie.title;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const filteredGroupedSales = groupedMovieSales.filter((item) =>
+    filteredMovieIds.includes(item.movieId)
   );
 
-  // Paginate movieWiseSales
-  const totalMovies = groupedMovieSales.length;
+  const detailedStats = await Promise.all(
+    filteredGroupedSales.map(async (entry) => {
+      const movieId = entry.movieId;
+
+      const [rentalStats, buyStats, totalPurchases] = await Promise.all([
+        prisma.purchase.aggregate({
+          where: {
+            ...dateFilter,
+            movieId,
+            purchase_type: 'RENT',
+          },
+          _sum: { amount: true },
+          _count: { _all: true },
+        }),
+        prisma.purchase.aggregate({
+          where: {
+            ...dateFilter,
+            movieId,
+            purchase_type: 'BUY',
+          },
+          _sum: { amount: true },
+          _count: { _all: true },
+        }),
+        prisma.purchase.count({
+          where: {
+            ...dateFilter,
+            movieId,
+          },
+        }),
+      ]);
+
+      return {
+        movieId,
+        movieTitle: movieTitleMap[movieId] || 'Unknown',
+        totalAmount: entry._sum.amount || 0,
+        totalRevenue: entry._sum.amount || 0,
+        rentalCount: rentalStats._count._all || 0,
+        buyCount: buyStats._count._all || 0,
+        totalBothPurchases: totalPurchases || 0,
+        totalRevenueRental: rentalStats._sum.amount || 0,
+        totalRevenueBuy: buyStats._sum.amount || 0,
+      };
+    })
+  );
+
+  // Pagination
+  const totalMovies = detailedStats.length;
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const paginatedMovieSales = groupedMovieSales.slice(startIndex, endIndex);
+  const paginatedMovieSales = detailedStats.slice(startIndex, endIndex);
 
   return {
-    movieWiseSales: paginatedMovieSales.map((entry) => ({
-      movieId: entry.movieId,
-      movieTitle: movieTitleMap[entry.movieId] || 'Unknown',
-      totalAmount: entry._sum.amount || 0,
-    })),
+    movieWiseSales: paginatedMovieSales,
     meta: {
-      total:totalMovies,
+      total: totalMovies,
       page,
-      limit:pageSize,
+      limit: pageSize,
       totalPage: Math.ceil(totalMovies / pageSize),
     },
   };
 };
+
 
 export const PurchaseServices = {
   createPurchase,
