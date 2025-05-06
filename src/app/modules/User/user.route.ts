@@ -9,7 +9,7 @@ router.post('/', UserControllers.createUser);
 
 router.get(
   '/',
-  auth(UserRole.USER, UserRole.ADMIN),
+  // auth(UserRole.USER, UserRole.ADMIN),
   UserControllers.getAllUsersFromDB,
 );
 

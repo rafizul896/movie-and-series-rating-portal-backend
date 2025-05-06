@@ -25,7 +25,7 @@ export const addMovieSchema = z.object({
     discountPrice: z
       .number({ message: 'Discount price must be a number' })
       .optional(),
-    thumbnail: z.string({ message: 'Thumbnail is required' }),
+    // thumbnail: z.string({ message: 'Thumbnail is required' }),
     streamingLink: z.string({ message: 'Streaming link is required' }),
     isTrending: z
       .boolean({ message: 'isTrending must be true or false' })
