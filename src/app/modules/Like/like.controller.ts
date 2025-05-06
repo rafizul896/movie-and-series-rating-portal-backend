@@ -7,7 +7,7 @@ import sendResponse from "../../utils/sendResponse";
 const toggleLike = catchAsync(async (req: Request, res: Response) => {
     const user = req.user;
 
-  const result = await likeService.toggleLike(user?.email, req.params.reviewId);
+  const result = await likeService.toggleLike(user?.id, req.params.reviewId);
 
   sendResponse(res, {
     statusCode: status.CREATED,

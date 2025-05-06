@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
+import { multerUpload } from '../../config/multer.config';
 import { movieController } from './movie.controller';
 import { MovieValidation } from './movie.validation';
 import auth from '../../middlewares/auth';
@@ -9,6 +10,11 @@ const movieRoutes = Router();
 
 movieRoutes.post(
   '/',
+  multerUpload.single('file'),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
   auth(UserRole.ADMIN),
   validationRequest(MovieValidation.addMovieSchema),
   movieController.addAMovie,

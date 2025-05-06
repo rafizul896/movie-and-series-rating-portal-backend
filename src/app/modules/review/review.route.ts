@@ -17,7 +17,7 @@ reviewRoutes.get("/movie/:movieId", reviewController.getReviewsByMovieId)
 
 
 
-reviewRoutes.patch("/:id/approve",auth(UserRole.ADMIN), reviewController.approvedReview) // (admin) Approve/unpublish
+reviewRoutes.patch("/:id/approve-toggle",auth(UserRole.ADMIN), reviewController.approvedUnApprovedReview) // (admin) Approve/unpublish
 
 reviewRoutes.patch("/:reviewId",auth(UserRole.USER),validationRequest(reviewValidation.updateReviewSchema), reviewController.editReview) // Edit review (if unpublished)
 reviewRoutes.delete("/:id",auth(UserRole.USER,UserRole.ADMIN), reviewController.deleteReview) // Delete review for user and admin
