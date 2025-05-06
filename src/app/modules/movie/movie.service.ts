@@ -7,7 +7,11 @@ import { TMovieFilterRequest } from './movie.interface';
 import { movieSearchAbleFields } from './movie.const';
 import AppError from '../../error/AppError';
 
-const addAMovie = async (movieData: Movie) => {
+const addAMovie = async (movieData: Movie, file: any) => {
+  if (file) {
+    movieData.thumbnail = file.path;
+  }
+
   const result = await prisma.movie.create({
     data: movieData,
   });
@@ -126,7 +130,7 @@ const getAllMovie = async (
     where: whereConditions,
     skip,
     take: limit,
-    orderBy: orderByCondition
+    orderBy: orderByCondition,
   });
 
   const total = await prisma.movie.count({
