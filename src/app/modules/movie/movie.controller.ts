@@ -6,6 +6,7 @@ import status from 'http-status';
 import pick from '../../shared/pick';
 
 const addAMovie = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.body)
   const result = await movieService.addAMovie(req.body);
 
   sendResponse(res, {
