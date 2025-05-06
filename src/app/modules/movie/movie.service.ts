@@ -190,6 +190,13 @@ const getAMovie = async (
       isTrending: true,
       thumbnail: true,
       discountPrice: true,
+
+      avgRating: true,
+      reviewCount: true,
+      totalRating : true,
+      likesCount: true,
+      createdAt: true,
+      updatedAt: true,
       reviews: {
         where: {
           OR: reviewOrConditions,
