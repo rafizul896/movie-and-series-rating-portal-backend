@@ -4,10 +4,14 @@ import prisma from '../../shared/prisma';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
 import { TMovieFilterRequest } from './movie.interface';
-import { movieFilterableFields } from './movie.const';
+import { movieSearchAbleFields } from './movie.const';
 import AppError from '../../error/AppError';
 
-const addAMovie = async (movieData: Movie) => {
+const addAMovie = async (movieData: Movie, file: any) => {
+  if (file) {
+    movieData.thumbnail = file.path;
+  }
+
   const result = await prisma.movie.create({
     data: movieData,
   });
@@ -38,7 +42,7 @@ const getAllMovie = async (
 
   if (params?.searchTerm) {
     andConditions.push({
-      OR: movieFilterableFields.map(({ field, operator }) => {
+      OR: movieSearchAbleFields.map(({ field, operator }) => {
         if (operator === 'equals') {
           const numericValue =
             typeof searchTerm === 'number'
@@ -93,6 +97,29 @@ const getAllMovie = async (
     });
   }
 
+  let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
+    createdAt: 'asc',
+  }; // default
+
+  if (options.sortBy) {
+    switch (options.sortBy) {
+      case 'topRated':
+        orderByCondition = { avgRating: 'desc' };
+        break;
+      case 'mostReviewed':
+        orderByCondition = { reviewCount: 'desc' };
+        break;
+      case 'latest':
+        orderByCondition = { createdAt: 'desc' };
+        break;
+      default:
+        if (options.sortOrder) {
+          orderByCondition = { [options.sortBy]: options.sortOrder };
+        }
+        break;
+    }
+  }
+
   andConditions.push({
     isDeleted: false,
   });
@@ -103,14 +130,7 @@ const getAllMovie = async (
     where: whereConditions,
     skip,
     take: limit,
-    orderBy:
-      options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: 'desc',
-          },
+    orderBy: orderByCondition,
   });
 
   const total = await prisma.movie.count({
@@ -125,13 +145,6 @@ const getAllMovie = async (
     },
     data: result,
   };
-
-  // const result = await prisma.movie.findMany({
-  //   where: {
-  //     isDeleted: false,
-  //   },
-  // });
-  // return result;
 };
 
 const getAMovie = async (
@@ -143,7 +156,7 @@ const getAMovie = async (
     options || {},
   );
 
-  //  Step 1: Review condition 
+  //  Step 1: Review condition
   type ReviewCondition =
     | { approved: boolean }
     | { userId: string; approved: boolean };
@@ -177,6 +190,13 @@ const getAMovie = async (
       isTrending: true,
       thumbnail: true,
       discountPrice: true,
+
+      avgRating: true,
+      reviewCount: true,
+      totalRating : true,
+      likesCount: true,
+      createdAt: true,
+      updatedAt: true,
       reviews: {
         where: {
           OR: reviewOrConditions,
@@ -227,26 +247,37 @@ const getAMovie = async (
     meta: {
       page,
       limit,
-      total,
+      TotalReview: total,
     },
     data: result,
   };
 };
 
-const updateAMovie = async (id: string, payload: any) => {
-  await prisma.movie.findUniqueOrThrow({
+const updateAMovie = async (
+  id: string,
+  payload: Partial<Movie>,
+  file?: any,
+) => {
+  await prisma.movie.findFirstOrThrow({
     where: {
       id,
       isDeleted: false,
     },
   });
+
+  const updateData: Partial<Movie> = {
+    ...payload,
+  };
+
+  if (file) {
+    updateData.thumbnail = file.path;
+  }
+
   const result = await prisma.movie.update({
-    where: {
-      id,
-      isDeleted: false,
-    },
-    data: payload,
+    where: { id },
+    data: updateData,
   });
+
   return result;
 };
 

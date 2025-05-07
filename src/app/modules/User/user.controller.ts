@@ -42,6 +42,17 @@ const getUserByIdFromDB = catchAsync(async (req, res) => {
   });
 });
 
+// const getMyProfile = catchAsync(async (req, res) => {
+//   const result = await UserService.getUserByIdFromDB(req.user);
+
+//   sendResponse(res, {
+//     statusCode: status.OK,
+//     success: true,
+//     message: 'Profile fetched successfully',
+//     data: result,
+//   });
+// });
+
 const updateIntoDB = catchAsync(async (req, res) => {
   const { id } = req.params;
   const payload = req.body;

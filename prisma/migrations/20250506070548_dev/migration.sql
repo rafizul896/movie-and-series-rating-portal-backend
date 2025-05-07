@@ -22,7 +22,6 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
-    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -47,6 +46,10 @@ CREATE TABLE "movies" (
     "thumbnail" TEXT NOT NULL,
     "streamingLink" TEXT NOT NULL,
     "isTrending" BOOLEAN NOT NULL DEFAULT false,
+    "totalRating" INTEGER NOT NULL DEFAULT 0,
+    "avgRating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "reviewCount" INTEGER NOT NULL DEFAULT 0,
+    "likesCount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -72,6 +75,7 @@ CREATE TABLE "reviews" (
 -- CreateTable
 CREATE TABLE "comments" (
     "id" TEXT NOT NULL,
+    "approved" BOOLEAN NOT NULL DEFAULT false,
     "content" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "reviewId" TEXT NOT NULL,
@@ -97,8 +101,21 @@ CREATE TABLE "watchlists" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "movieId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "watchlists_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "wishlists" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "movieId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "wishlists_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -129,6 +146,9 @@ CREATE UNIQUE INDEX "likes_userId_reviewId_key" ON "likes"("userId", "reviewId")
 CREATE UNIQUE INDEX "watchlists_userId_movieId_key" ON "watchlists"("userId", "movieId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "wishlists_userId_movieId_key" ON "wishlists"("userId", "movieId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "purchase_userId_movieId_key" ON "purchase"("userId", "movieId");
 
 -- AddForeignKey
@@ -154,6 +174,12 @@ ALTER TABLE "watchlists" ADD CONSTRAINT "watchlists_userId_fkey" FOREIGN KEY ("u
 
 -- AddForeignKey
 ALTER TABLE "watchlists" ADD CONSTRAINT "watchlists_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "movies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_movieId_fkey" FOREIGN KEY ("movieId") REFERENCES "movies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "purchase" ADD CONSTRAINT "purchase_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

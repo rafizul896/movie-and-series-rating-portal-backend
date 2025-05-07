@@ -1,12 +1,13 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Review, User, UserRole } from '@prisma/client';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
-import { ReviewFilter } from './review.interface';
 import { IPaginationOptions } from '../../interface/pagination';
 import { paginationHelper } from '../../helpers/paginationHelpers';
+import { updateMovieReviewRatingStats } from '../movie/movie.utils';
 
-const createReview = async (payload: Review) => {
+const createReview = async (user: Partial<User>, payload: Review) => {
   const result = await prisma.$transaction(async (tx) => {
     // 1. Check if the movie exists
     const movieExists = await tx.movie.findUnique({
@@ -20,22 +21,33 @@ const createReview = async (payload: Review) => {
     const existingReview = await tx.review.findFirst({
       where: {
         movieId: payload.movieId,
-        userId: payload.userId,
-        approved: false, // Check for unapproved reviews
+        userId: user.id!,
       },
     });
-    if (existingReview) {
+
+    if (existingReview && existingReview.approved === false) {
       throw new AppError(
         409,
         'You have already submitted a review for this movie.',
+      );
+    } else if (existingReview && existingReview.approved === true) {
+      throw new AppError(
+        409,
+        'You have to wait for the admin to approve your review.',
       );
     }
 
     // 3. Create the review
     const createdReview = await tx.review.create({
-      data: payload,
+      data: {
+        ...payload,
+        approved: false,
+        userId: user.id!,
+      },
     });
 
+    // // 4. Update the movie's average rating and review count
+    // await updateMovieReviewRatingStats(movieExists?.id);
     return createdReview;
   });
 
@@ -102,33 +114,74 @@ const getAllReview = async () => {
 
 // get all reviews data based on filter
 const getReviews = async (
-  filter: ReviewFilter = 'all',
   options: IPaginationOptions,
+  filterReview?: string,
+  filterComment?: string,
 ) => {
-  let whereCondition = {};
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
 
-  if (filter === 'approved') {
-    whereCondition = { approved: true };
-  } else if (filter === 'unapproved') {
-    whereCondition = { approved: false };
+  // Build review filter condition
+  const whereCondition: any = {};
+
+  if (filterReview === 'approved') {
+    whereCondition.approved = true;
+  } else if (filterReview === 'unapproved') {
+    whereCondition.approved = false;
   }
 
-  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  // Build comment filter condition (only if review is approved)
+  let commentWhere: any = undefined;
+
+  if (filterReview === 'approved') {
+    if (filterComment === 'approved') {
+      commentWhere = { approved: true };
+    } else if (filterComment === 'unapproved') {
+      commentWhere = { approved: false };
+    }
+  }
 
   const result = await prisma.review.findMany({
     where: whereCondition,
-    include: {
-      movie: true,
-    },
     skip,
     take: limit,
     orderBy:
       options.sortBy && options.sortOrder
         ? { [options.sortBy]: options.sortOrder }
         : { createdAt: 'desc' },
+    select: {
+      id: true,
+      content: true,
+      approved: true,
+      createdAt: true,
+      movie: {
+        select: {
+          id: true,
+          title: true,
+          thumbnail: true,
+          streamingLink: true,
+        },
+      },
+      comments: commentWhere
+        ? {
+            where: commentWhere,
+            select: {
+              id: true,
+              content: true,
+              approved: true,
+              createdAt: true,
+            },
+          }
+        : {
+            select: {
+              id: true,
+              content: true,
+              approved: true,
+              createdAt: true,
+            },
+          },
+    },
   });
 
-  // Count total reviews for pagination
   const total = await prisma.review.count({
     where: whereCondition,
   });
@@ -173,7 +226,7 @@ const editReview = async (
       where: {
         id: review.id,
       },
-      data: existingReview,
+      data: { ...existingReview, approved: false },
     });
 
     return updatedReview;
@@ -181,40 +234,46 @@ const editReview = async (
   return result;
 };
 
-const approvedReview = async (user: Partial<User>, reviewId: string) => {
+const approvedUnApprovedReview = async (
+  user: Partial<User>,
+  reviewId: string,
+) => {
+  let movieId: string = '';
+
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Find the review
     const review = await tx.review.findFirst({
-      where: {
-        id: reviewId,
-      },
+      where: { id: reviewId },
     });
 
     if (!review) {
       throw new AppError(403, 'Review not found');
     }
 
-    // 2. check if the review is published or not
-    if (review?.approved === true) {
-      throw new AppError(403, 'The review is already approved');
-    }
+    // if (review.approved === true) {
+    //   throw new AppError(403, 'The review is already approved');
+    // }
 
-    // 3. update the review
+    movieId = review.movieId; // Save for later use
+
     const updatedReview = await tx.review.update({
-      where: {
-        id: review.id,
-      },
+      where: { id: review.id },
       data: {
-        approved: true,
+        approved: review.approved === false ? true : false,
       },
     });
 
     return updatedReview;
   });
+
+  // Update movie stats outside the transaction
+  await updateMovieReviewRatingStats(movieId);
+
   return result;
 };
 
 const deleteReview = async (user: Partial<User>, reviewId: string) => {
+  let movieId: string = '';
+
   const result = await prisma.$transaction(async (tx) => {
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { email: user?.email },
@@ -225,7 +284,7 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
     const review = await tx.review.findFirst({
       where: {
         id: reviewId,
-        ...(isAdmin ? {} : { userId: checkUser.id }), // if not admin then check userID!
+        ...(isAdmin ? {} : { userId: checkUser.id }),
       },
     });
 
@@ -237,11 +296,19 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
       throw new AppError(403, 'You cannot delete an approved review');
     }
 
-    // 3. delete the review
+    movieId = review.movieId;
+    // Delete related comments first
+    await tx.comment.deleteMany({
+      where: { reviewId: review.id },
+    });
+
     return await tx.review.delete({
       where: { id: review.id },
     });
   });
+
+  await updateMovieReviewRatingStats(movieId);
+
   return result;
 };
 
@@ -251,7 +318,7 @@ export const reviewService = {
   getAllReview,
   getReviewsByMovieId,
   editReview,
-  approvedReview,
+  approvedUnApprovedReview,
   deleteReview,
   getReviews,
 };

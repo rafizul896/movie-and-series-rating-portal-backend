@@ -4,16 +4,21 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from './app/routes';
 import { globalErrorHandler } from './app/error/globalErrorHandler';
-
 const app: Application = express();
-app.use(cors());
+
+const corseOptions = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corseOptions));
 
 // parder
 app.use(cookieParser());
 app.use(express.json());
 
 // application routes
-app.use("/api",router)
+app.use('/api', router);
 
 app.get('/', (req: Request, res: Response) => {
   res.send({

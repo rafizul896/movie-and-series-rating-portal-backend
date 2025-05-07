@@ -4,11 +4,11 @@ import {  reviewService } from './review.service';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
 import { User } from '@prisma/client';
-import { ReviewFilter } from './review.interface';
 import pick from '../../shared/pick';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
-  const result = await reviewService.createReview(req.body);
+  const user = req?.user as User;
+  const result = await reviewService.createReview(user,req.body);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -59,35 +59,37 @@ const { reviewId } = req.params;
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Retrieve reviews data by movieId successfully',
+    message: 'Review edited successfully',
     data: result,
   });
 });
 
-const approvedReview = catchAsync(async (req: Request, res: Response) => {
+const approvedUnApprovedReview = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as User;
 const { id } = req.params;
-  const result = await reviewService.approvedReview(user,id);
+  const result = await reviewService.approvedUnApprovedReview(user,id);
 
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: 'Review approved successfully',
+    message: `Review ${result?.approved === true ? 'approved': 'unapproved'} successfully`,
     data: result,
   });
 });
 
 const getReviews = catchAsync(async (req: Request, res: Response) => {
-const filterOptions  = req?.query?.filter as ReviewFilter;
+ 
+const filterReview = req.query.filterReview as string | undefined;
+const filterComment = req.query.filterComment as string | undefined;
 
 const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await reviewService.getReviews(filterOptions, options);
+  const result = await reviewService.getReviews(options,filterReview,filterComment);
 
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: `Retrieve ${filterOptions} reviews successfully`,
+    message: `Retrieve  reviews successfully`,
     data: result,
   });
 });
@@ -111,7 +113,7 @@ export const reviewController = {
   getAllReview,
   getReviewsByMovieId,
   editReview,
-  approvedReview,
+  approvedUnApprovedReview,
   deleteReview,
   getReviews
 };

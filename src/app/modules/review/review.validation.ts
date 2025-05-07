@@ -6,7 +6,6 @@ const addReviewSchema = z.object({
     content: z.string().min(1, 'Content is required'),
     tags: z.array(z.string()).optional(),
     hasSpoiler: z.boolean().optional(),
-    userId: z.string().uuid(),
     movieId: z.string().uuid(),
   }),
 });

@@ -11,7 +11,6 @@ const auth = (...roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token: string = req.headers.authorization!;
-
       if (!token) {
         throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');
       }
@@ -34,10 +33,9 @@ const auth = (...roles: string[]) => {
         },
       });
 
-      if (userData) {
+      if (!userData) {
         throw new AppError(status.NOT_FOUND, 'User is Not Found!');
       }
-
       next();
     } catch (err) {
       next(err);
