@@ -6,7 +6,7 @@ import status from 'http-status';
 import pick from '../../shared/pick';
 
 const addAMovie = catchAsync(async (req: Request, res: Response) => {
-  const result = await movieService.addAMovie(req.body);
+  const result = await movieService.addAMovie(req.body, req.file);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -41,7 +41,7 @@ const getAMovie = catchAsync(async (req: Request, res: Response) => {
 
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await movieService.getAMovie(id,options,userId);
+  const result = await movieService.getAMovie(id, options, userId);
 
   sendResponse(res, {
     statusCode: status.CREATED,
