@@ -246,20 +246,31 @@ const getAMovie = async (
   };
 };
 
-const updateAMovie = async (id: string, payload: any) => {
-  await prisma.movie.findUniqueOrThrow({
+const updateAMovie = async (
+  id: string,
+  payload: Partial<Movie>,
+  file?: any,
+) => {
+  await prisma.movie.findFirstOrThrow({
     where: {
       id,
       isDeleted: false,
     },
   });
+
+  const updateData: Partial<Movie> = {
+    ...payload,
+  };
+
+  if (file) {
+    updateData.thumbnail = file.path;
+  }
+
   const result = await prisma.movie.update({
-    where: {
-      id,
-      isDeleted: false,
-    },
-    data: payload,
+    where: { id },
+    data: updateData,
   });
+
   return result;
 };
 

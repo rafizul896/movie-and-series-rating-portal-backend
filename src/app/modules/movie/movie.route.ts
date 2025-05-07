@@ -21,8 +21,22 @@ movieRoutes.post(
 );
 movieRoutes.get('/', movieController.getAllMovie);
 movieRoutes.get('/:id', movieController.getAMovie);
-movieRoutes.patch('/:id',auth(UserRole.ADMIN),
-validationRequest(MovieValidation.updateMovieSchema), movieController.updateAMovie);
-movieRoutes.delete('/soft/:id',auth(UserRole.ADMIN), movieController.deleteAMovie);
+
+movieRoutes.put(
+  '/:id',
+  multerUpload.single('file'),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  auth(UserRole.ADMIN),
+  // validationRequest(MovieValidation.updateMovieSchema),
+  movieController.updateAMovie,
+);
+movieRoutes.delete(
+  '/soft/:id',
+  auth(UserRole.ADMIN),
+  movieController.deleteAMovie,
+);
 
 export default movieRoutes;
