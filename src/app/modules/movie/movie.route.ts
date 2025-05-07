@@ -20,7 +20,7 @@ movieRoutes.post(
   movieController.addAMovie,
 );
 movieRoutes.get('/', movieController.getAllMovie);
-movieRoutes.get('/:id', movieController.getAMovie);
+movieRoutes.post('/:id', movieController.getAMovie);
 
 movieRoutes.put(
   '/:id',

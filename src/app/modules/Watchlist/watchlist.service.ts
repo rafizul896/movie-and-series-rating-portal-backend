@@ -35,6 +35,25 @@ const getAllWatchlistByUser = async (email: string) => {
     where: {
       userId: userData?.id,
     },
+    select: {
+      id: true,
+      createdAt:  true,
+      updatedAt: true,
+      movies: {
+        select: {
+          id: true,
+          title: true,
+          releaseYear: true,
+          createdAt: true,
+          avgRating: true,
+          genres: true,
+          synopsis: true,
+          buyPrice: true,
+          rentPrice: true,
+          thumbnail: true,
+        },
+      },
+    },
   });
 
   return result;
