@@ -114,12 +114,26 @@ model Like {
   @@map("likes")
 }
 
+// model Watchlist {
+//   id      String @id @default(uuid())
+//   userId  String
+//   movieId String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   users  User  @relation(fields: [userId], references: [id])
+//   movies Movie @relation(fields: [movieId], references: [id])
+
+//   @@unique([userId, movieId])
+//   @@map("watchlists")
+// }
 model Watchlist {
-  id      String @id @default(uuid())
-  userId  String
-  movieId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String
+  // videoUrl  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   users  User  @relation(fields: [userId], references: [id])
   movies Movie @relation(fields: [movieId], references: [id])

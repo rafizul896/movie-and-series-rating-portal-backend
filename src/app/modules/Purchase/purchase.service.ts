@@ -2,6 +2,7 @@ import status from 'http-status';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 import { Prisma } from '@prisma/client';
+import { createWatchlistFromPurchase } from './purchase.utils';
 
 const createPurchase = async (payload: any) => {
   const exists = await prisma.purchase.findFirst({
@@ -21,6 +22,8 @@ const createPurchase = async (payload: any) => {
   const result = await prisma.purchase.create({
     data: payload,
   });
+
+  await createWatchlistFromPurchase(payload?.userId,payload.movieId )
 
   return result;
 };
