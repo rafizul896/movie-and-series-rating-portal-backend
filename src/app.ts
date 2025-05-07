@@ -7,7 +7,7 @@ import { globalErrorHandler } from './app/error/globalErrorHandler';
 const app: Application = express();
 
 const corseOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3002'],
+  origin: true,
   credentials: true,
 };
 
