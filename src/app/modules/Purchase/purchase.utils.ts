@@ -20,8 +20,8 @@ export const createWatchlistFromPurchase = async (
   // Step 3: Otherwise, create new watchlist entry
   const result = await prisma.watchlist.create({
     data: {
-      userId,
-      movieId,
+      userId:userId,
+      movieId: movieId,
     },
   });
 

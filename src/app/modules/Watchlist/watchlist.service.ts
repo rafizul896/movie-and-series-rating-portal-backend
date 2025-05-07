@@ -1,7 +1,6 @@
 import status from 'http-status';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
-import { PaymentStatus } from '@prisma/client';
 
 // const createWatchlist = async (payload: {
 //   userId: string;
@@ -79,34 +78,19 @@ const getAllPurchasedMoviesByUser = async (email: string) => {
     throw new AppError(status.NOT_FOUND, 'User not found');
   }
 
-  const purchases = await prisma.purchase.findMany({
+  const result = await prisma.watchlist.findMany({
     where: {
-      userId: user.id,
-      paymentStatus: PaymentStatus.PAID,
+      userId: user?.id,
     },
     select: {
       id: true,
-      purchase_type: true,
-      purchasedAt: true,
-      accessExpiryTime: true,
-      movie: {
-        select: {
-          id: true,
-          title: true,
-          releaseYear: true,
-          createdAt: true,
-          avgRating: true,
-          genres: true,
-          synopsis: true,
-          buyPrice: true,
-          rentPrice: true,
-          thumbnail: true,
-        },
-      },
-    },
+      createdAt: true,
+      movies: true
+    }
+    
   });
 
-  return purchases;
+  return result;
 };
 
 const getSingleWatchlistItem = async (email: string, id: string) => {
@@ -117,7 +101,7 @@ const getSingleWatchlistItem = async (email: string, id: string) => {
     }
   })
 
-  const result = await prisma.watchlist.findFirst({
+  const result = await prisma.watchlist.findUniqueOrThrow({
     where: {
       userId: user?.id,
       id
