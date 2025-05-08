@@ -30,6 +30,49 @@ const createPurchase = async (payload: any) => {
   return result;
 };
 
+const createManyPurchase = async (payloads: any[]) => {
+  if (!Array.isArray(payloads) || payloads.length === 0) {
+    throw new AppError(status.BAD_REQUEST, 'No purchases provided.');
+  }
+
+  // Filter out already existing purchases
+  const existingPurchases = await prisma.purchase.findMany({
+    where: {
+      OR: payloads.map((p) => ({
+        userId: p.userId,
+        movieId: p.movieId,
+      })),
+    },
+    select: {
+      userId: true,
+      movieId: true,
+    },
+  });
+
+  const existingMap = new Set(
+    existingPurchases.map((p) => `${p.userId}-${p.movieId}`),
+  );
+
+  const filteredPayloads = payloads.filter(
+    (p) => !existingMap.has(`${p.userId}-${p.movieId}`),
+  );
+
+  if (filteredPayloads.length === 0) {
+    throw new AppError(
+      status.CONFLICT,
+      'All selected content has already been purchased.',
+    );
+  }
+
+  //  Create remaining purchases
+  const result = await prisma.purchase.createMany({
+    data: filteredPayloads,
+    skipDuplicates: true,
+  });
+
+  return result;
+};
+
 const getPurchasesByUser = async (email: string) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -215,13 +258,16 @@ const getMovieWiseSales = async (query: any) => {
   });
 
   const filteredMovieIds = movieData.map((movie) => movie.id);
-  const movieTitleMap = movieData.reduce((acc, movie) => {
-    acc[movie.id] = movie.title;
-    return acc;
-  }, {} as Record<string, string>);
+  const movieTitleMap = movieData.reduce(
+    (acc, movie) => {
+      acc[movie.id] = movie.title;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   const filteredGroupedSales = groupedMovieSales.filter((item) =>
-    filteredMovieIds.includes(item.movieId)
+    filteredMovieIds.includes(item.movieId),
   );
 
   const detailedStats = await Promise.all(
@@ -266,7 +312,7 @@ const getMovieWiseSales = async (query: any) => {
         totalRevenueRental: rentalStats._sum.amount || 0,
         totalRevenueBuy: buyStats._sum.amount || 0,
       };
-    })
+    }),
   );
 
   // Pagination
@@ -286,9 +332,9 @@ const getMovieWiseSales = async (query: any) => {
   };
 };
 
-
 export const PurchaseServices = {
   createPurchase,
+  createManyPurchase,
   getPurchasesByUser,
   updatePurchase,
   deletePurchase,
