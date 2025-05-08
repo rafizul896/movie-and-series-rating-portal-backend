@@ -1,27 +1,48 @@
-import { Router } from "express";
-import { reviewController } from "./review.controller";
-import auth from "../../middlewares/auth";
-import { UserRole } from "@prisma/client";
-import { validationRequest } from "../../middlewares/validationRequest";
-import { reviewValidation } from "./review.validation";
+import { Router } from 'express';
+import { reviewController } from './review.controller';
+import auth from '../../middlewares/auth';
+import { UserRole } from '@prisma/client';
+import { validationRequest } from '../../middlewares/validationRequest';
+import { reviewValidation } from './review.validation';
+import optionalAuth from '../../middlewares/optionalAuth';
 
 const reviewRoutes = Router();
 
+reviewRoutes.post(
+  '/',
+  auth(UserRole.ADMIN, UserRole.USER),
+  validationRequest(reviewValidation.addReviewSchema),
+  reviewController.createReview,
+);
 
-reviewRoutes.post("/",auth(UserRole.ADMIN, UserRole.USER),validationRequest(reviewValidation.addReviewSchema), reviewController.createReview)
+reviewRoutes.get('/movie/', reviewController.getAllReview);
+reviewRoutes.get('/movie/status', reviewController.getReviews); // (admin) Get all unapproved reviews
+reviewRoutes.get('/:id', reviewController.getSingleReview);
+// reviewRoutes.get("/movie/:movieId", reviewController.getReviewsByMovieId)
 
-reviewRoutes.get("/movie/", reviewController.getAllReview)
-reviewRoutes.get("/movie/status", reviewController.getReviews) // (admin) Get all unapproved reviews
-reviewRoutes.get("/:id", reviewController.getSingleReview)
-reviewRoutes.get("/movie/:movieId", reviewController.getReviewsByMovieId)
+reviewRoutes.get(
+  '/movie/:movieId',
+  optionalAuth,
+  reviewController.getReviewsByMovieId,
+);
 
+reviewRoutes.patch(
+  '/:id/approve-toggle',
+  auth(UserRole.ADMIN),
+  reviewController.approvedUnApprovedReview,
+); // (admin) Approve/unpublish
 
-
-reviewRoutes.patch("/:id/approve-toggle",auth(UserRole.ADMIN), reviewController.approvedUnApprovedReview) // (admin) Approve/unpublish
-
-reviewRoutes.patch("/:reviewId",auth(UserRole.USER),validationRequest(reviewValidation.updateReviewSchema), reviewController.editReview) // Edit review (if unpublished)
-reviewRoutes.delete("/:id",auth(UserRole.USER,UserRole.ADMIN), reviewController.deleteReview) // Delete review for user and admin
-
+reviewRoutes.patch(
+  '/:reviewId',
+  auth(UserRole.USER),
+  validationRequest(reviewValidation.updateReviewSchema),
+  reviewController.editReview,
+); // Edit review (if unpublished)
+reviewRoutes.delete(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN),
+  reviewController.deleteReview,
+); // Delete review for user and admin
 
 export default reviewRoutes;
 
