@@ -32,6 +32,11 @@ router.delete(
 );
 
 router.get(
+  '/purchase-history',
+  auth(UserRole.ADMIN),
+  PurchaseControllers.getPurchasesHistory,
+);
+router.get(
   '/purchase-analytics',
   // auth(UserRole.ADMIN),
   PurchaseControllers.getPurchaseAnalytics,

@@ -2,6 +2,7 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { PurchaseServices } from './purchase.service';
+import pick from '../../shared/pick';
 
 const createPurchase = catchAsync(async (req, res) => {
   const result = await PurchaseServices.createPurchase(req.body);
@@ -17,6 +18,22 @@ const createPurchase = catchAsync(async (req, res) => {
 const getPurchasesByUser = catchAsync(async (req, res) => {
   const email = req?.user?.email;
   const result = await PurchaseServices.getPurchasesByUser(email);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Purchase history fetched successfully',
+    data: result,
+  });
+});
+
+const getPurchasesHistory = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, [
+    'paymentStatus',
+    'purchase_type',
+  ]);
+  const result = await PurchaseServices.getPurchasesHistory(filters,options);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -80,4 +97,5 @@ export const PurchaseControllers = {
   deletePurchase,
   getPurchaseAnalytics,
   getMovieWiseSales,
+  getPurchasesHistory
 };
