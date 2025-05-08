@@ -41,7 +41,7 @@ model Movie {
   platforms     String[]
   buyPrice      Float
   rentPrice     Float
-  discountPrice Float?
+  discountPercentage Float?
   thumbnail     String
   streamingLink String
   reviews       Review[]

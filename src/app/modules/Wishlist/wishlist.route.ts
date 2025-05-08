@@ -21,7 +21,6 @@ router.get(
 
 router.delete(
   '/:id',
-  auth(UserRole.USER, UserRole.ADMIN),
   wishlistControllers.deleteWishlistItem,
 );
 
