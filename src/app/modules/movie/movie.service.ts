@@ -196,7 +196,7 @@ const getAMovie = async (
       streamingLink: true,
       isTrending: true,
       thumbnail: true,
-      discountPrice: true,
+      discountPercentage: true,
 
       avgRating: true,
       reviewCount: true,
