@@ -50,6 +50,8 @@ const getSingleReview = catchAsync(async (req: Request, res: Response) => {
 //     data: result,
 //   });
 // });
+
+//updated get review by movie id to get the information of a user liked or not
 const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as User | undefined;
   const userId = user?.id;
