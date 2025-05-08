@@ -82,20 +82,27 @@ const getAllMovie = async (
 
   // Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => {
-        const value = (filterData as any)[key];
+  andConditions.push({
+    AND: Object.keys(filterData).map((key) => {
+      const value = (filterData as any)[key];
+      if (value === 'true' || value === 'false') {
+        return {
+          [key]: Boolean(value),
+        };
+      } else {
         const valuesArray = String(value)
           .split(',')
           .map((v) => v.trim());
+
         return {
           [key]: {
             hasSome: valuesArray,
           },
         };
-      }),
-    });
-  }
+      }
+    }),
+  });
+}
 
   let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
     createdAt: 'asc',
