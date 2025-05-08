@@ -50,9 +50,10 @@ const getAMovie = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const updateAMovie = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await movieService.updateAMovie(id, req.body);
+  const result = await movieService.updateAMovie(id, req.body, req.file);
 
   sendResponse(res, {
     statusCode: status.CREATED,

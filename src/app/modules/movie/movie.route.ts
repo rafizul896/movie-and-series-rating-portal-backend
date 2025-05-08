@@ -20,12 +20,17 @@ movieRoutes.post(
   movieController.addAMovie,
 );
 movieRoutes.get('/', movieController.getAllMovie);
-// movieRoutes.get('/:id', movieController.getAMovie);
 movieRoutes.post('/:id', movieController.getAMovie);
-movieRoutes.patch(
+
+movieRoutes.put(
   '/:id',
+  multerUpload.single('file'),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
   auth(UserRole.ADMIN),
-  validationRequest(MovieValidation.updateMovieSchema),
+  // validationRequest(MovieValidation.updateMovieSchema),
   movieController.updateAMovie,
 );
 movieRoutes.delete(
