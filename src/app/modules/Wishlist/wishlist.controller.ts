@@ -37,8 +37,21 @@ const deleteWishlistItem = catchAsync(async (req, res) => {
   });
 });
 
+const deleteManyWishlistItem = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await wishlistServices.deleteManyWishlistItem(user.id);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Wishlist items is deleted successfully',
+    data: result,
+  });
+});
+
 export const wishlistControllers = {
   createWishlist,
   getAllWishlistByUser,
   deleteWishlistItem,
+  deleteManyWishlistItem,
 };
