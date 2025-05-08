@@ -58,7 +58,6 @@ const getSingleReview = async (reviewId: string) => {
   const result = await prisma.review.findUniqueOrThrow({
     where: {
       id: reviewId,
-      approved: true,
     },
   });
   return result;
