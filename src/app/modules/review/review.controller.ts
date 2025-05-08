@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
-import {  reviewService } from './review.service';
+import { reviewService } from './review.service';
 import sendResponse from '../../utils/sendResponse';
 import status from 'http-status';
 import { User } from '@prisma/client';
@@ -8,7 +8,7 @@ import pick from '../../shared/pick';
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
   const user = req?.user as User;
-  const result = await reviewService.createReview(user,req.body);
+  const result = await reviewService.createReview(user, req.body);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -40,11 +40,29 @@ const getSingleReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
+//   const result = await reviewService.getReviewsByMovieId(req.params.movieId);
+
+//   sendResponse(res, {
+//     statusCode: status.CREATED,
+//     success: true,
+//     message: 'Retrieve reviews data by movieId successfully',
+//     data: result,
+//   });
+// });
+
+//updated get review by movie id to get the information of a user liked or not
 const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
-  const result = await reviewService.getReviewsByMovieId(req.params.movieId);
+  const user = req.user as User | undefined;
+  const userId = user?.id;
+
+  const result = await reviewService.getReviewsByMovieId(
+    req.params.movieId,
+    userId,
+  );
 
   sendResponse(res, {
-    statusCode: status.CREATED,
+    statusCode: status.OK,
     success: true,
     message: 'Retrieve reviews data by movieId successfully',
     data: result,
@@ -53,8 +71,8 @@ const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
 
 const editReview = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as User;
-const { reviewId } = req.params;
-  const result = await reviewService.editReview(user,reviewId, req.body);
+  const { reviewId } = req.params;
+  const result = await reviewService.editReview(user, reviewId, req.body);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -64,27 +82,32 @@ const { reviewId } = req.params;
   });
 });
 
-const approvedUnApprovedReview = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as User;
-const { id } = req.params;
-  const result = await reviewService.approvedUnApprovedReview(user,id);
+const approvedUnApprovedReview = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user as User;
+    const { id } = req.params;
+    const result = await reviewService.approvedUnApprovedReview(user, id);
 
-  sendResponse(res, {
-    statusCode: status.CREATED,
-    success: true,
-    message: `Review ${result?.approved === true ? 'approved': 'unapproved'} successfully`,
-    data: result,
-  });
-});
+    sendResponse(res, {
+      statusCode: status.CREATED,
+      success: true,
+      message: `Review ${result?.approved === true ? 'approved' : 'unapproved'} successfully`,
+      data: result,
+    });
+  },
+);
 
 const getReviews = catchAsync(async (req: Request, res: Response) => {
- 
-const filterReview = req.query.filterReview as string | undefined;
-const filterComment = req.query.filterComment as string | undefined;
+  const filterReview = req.query.filterReview as string | undefined;
+  const filterComment = req.query.filterComment as string | undefined;
 
-const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
-  const result = await reviewService.getReviews(options,filterReview,filterComment);
+  const result = await reviewService.getReviews(
+    options,
+    filterReview,
+    filterComment,
+  );
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -96,8 +119,8 @@ const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
 
 const deleteReview = catchAsync(async (req: Request, res: Response) => {
   const user = req?.user as User;
-const { id } = req.params;
-  const result = await reviewService.deleteReview(user,id);
+  const { id } = req.params;
+  const result = await reviewService.deleteReview(user, id);
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -115,5 +138,5 @@ export const reviewController = {
   editReview,
   approvedUnApprovedReview,
   deleteReview,
-  getReviews
+  getReviews,
 };
