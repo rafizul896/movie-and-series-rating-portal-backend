@@ -62,9 +62,19 @@ const deleteWishlistItem = async (id: string) => {
 
   return result;
 };
+const deleteManyWishlistItem = async (userId: string) => {
+  const result = await prisma.wishlist.deleteMany({
+    where: {
+      userId,
+    },
+  });
+
+  return result;
+};
 
 export const wishlistServices = {
   createWishlist,
   getAllWishlistByUser,
   deleteWishlistItem,
+  deleteManyWishlistItem,
 };

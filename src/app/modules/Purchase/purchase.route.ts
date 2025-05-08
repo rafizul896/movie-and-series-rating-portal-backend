@@ -13,6 +13,11 @@ router.post(
   PurchaseControllers.createPurchase,
 );
 
+router.post(
+  '/many-purchase',
+  PurchaseControllers.createManyPurchase,
+);
+
 router.get(
   '/',
   auth(UserRole.USER, UserRole.ADMIN),

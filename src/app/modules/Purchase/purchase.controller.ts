@@ -13,6 +13,16 @@ const createPurchase = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const createManyPurchase = catchAsync(async (req, res) => {
+  const result = await PurchaseServices.createManyPurchase(req.body);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Purchase successful!',
+    data: result,
+  });
+});
 
 const getPurchasesByUser = catchAsync(async (req, res) => {
   const email = req?.user?.email;
@@ -75,6 +85,7 @@ const getMovieWiseSales = catchAsync(async (req, res) => {
 
 export const PurchaseControllers = {
   createPurchase,
+  createManyPurchase,
   getPurchasesByUser,
   updatePurchase,
   deletePurchase,
