@@ -37,3 +37,40 @@ It is built with **Node.js**, **Express.js**, and **Prisma ORM**, and handles al
 
 
 ---
+
+## 🔐 Core Features
+
+- 🔑 **Authentication & Authorization**  
+  - Role-based login system for **Users** and **Admins**
+
+- 🎬 **Media Library Management (CRUD)**  
+  - Admins can add, update, delete, and manage movies/series with:
+    - Title, Description, Genre, Director, Cast, Release Year, Platform, and Price
+
+- 🌟 **Review & Rating System**  
+  - Users can:
+    - Submit/edit/delete reviews with 1–10 star ratings  
+    - Add spoiler warnings and custom tags
+
+- 💳 **Buy/Rent Functionality with Payment Integration**  
+  - Secure payments via Stripe  
+  - Access streaming links after purchase/rent
+
+- 🧾 **Purchase History Tracking**  
+  - Users can view a list of previously bought or rented content  
+  - Streaming links remain accessible if valid
+
+- 🛠️ **Admin Moderation Tools**  
+  - Approve/unpublish/delete reviews and comments  
+  - Monitor user activity and content behavior
+
+- 📊 **Analytics Dashboard**  
+  - View aggregated insights such as:
+    - Most reviewed titles  
+    - Top rated movies/series  
+    - User engagement metrics
+
+- 🌐 **RESTful API Design**  
+  - Follows REST principles  
+  - Uses proper HTTP methods (GET, POST, PUT, DELETE) and status codes
+
