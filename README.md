@@ -74,3 +74,26 @@ It is built with **Node.js**, **Express.js**, and **Prisma ORM**, and handles al
   - Follows REST principles  
   - Uses proper HTTP methods (GET, POST, PUT, DELETE) and status codes
 
+
+## 🧑‍💻 Getting Started
+
+```bash
+git clone https://github.com/rafizul896/movie-and-series-rating-portal-backend.git
+cd movie-and-series-rating-portal-backend
+
+npm install
+
+# Setup environment variables
+cp .env
+
+# Generate Prisma client
+npx prisma generate
+
+# Run database migration (if needed)
+npx prisma db push
+
+# Start development server
+npm run dev
+```
+
+---
