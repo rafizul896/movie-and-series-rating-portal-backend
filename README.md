@@ -141,3 +141,16 @@ npm run dev
 
 
 ---
+
+## 🔒 Security Notes
+
+- All user passwords are hashed using **bcrypt** before storing in the database.
+- Authentication is handled via **securely signed JWTs** (JSON Web Tokens).
+- **Environment variables** are used to store sensitive information (e.g., JWT secret, DB credentials).
+- Input validation is enforced using **Zod** schemas to prevent injection attacks.
+- **Rate limiting** (recommended) helps protect against brute-force attacks.
+- **CORS** is configured to restrict unauthorized domain access.
+- **Cookie-parser** is used for secure cookie handling in authenticated routes.
+- Use of **HTTPS** is recommended in production for encrypted data transfer.
+
+---
