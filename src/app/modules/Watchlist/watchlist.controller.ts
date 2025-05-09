@@ -2,6 +2,8 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { WatchlistServices } from './watchlist.service';
+import { Request, Response } from 'express';
+import { TUser } from '../../interface/user.type';
 
 // const createWatchlist = catchAsync(async (req, res) => {
 //   const result = await WatchlistServices.createWatchlist(req.body);
@@ -26,7 +28,7 @@ import { WatchlistServices } from './watchlist.service';
 //   });
 // });
 
-const getAllWatchlistByUser = catchAsync(async (req, res) => {
+const getAllWatchlistByUser = catchAsync(async (req:Request, res:Response) => {
   const result = await WatchlistServices.getAllPurchasedMoviesByUser(req?.user?.email);
 
   sendResponse(res, {
@@ -37,9 +39,8 @@ const getAllWatchlistByUser = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleWatchlistItem = catchAsync(async (req, res) => {
-  const {email} = req.user;
-  console.log(email)
+const getSingleWatchlistItem = catchAsync(async (req:Request, res:Response) => {
+  const {email} = req.user as TUser;
   const result = await WatchlistServices.getSingleWatchlistItem(email,req?.params.id);
 
   sendResponse(res, {
