@@ -147,6 +147,7 @@ const getAllMovie = async (
   };
 };
 
+
 const getAMovie = async (
   id: string,
   options: IPaginationOptions,
