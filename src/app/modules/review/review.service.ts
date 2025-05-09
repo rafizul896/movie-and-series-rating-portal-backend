@@ -118,6 +118,7 @@ const getReviewsByMovieId = async (movieId: string, userId?: string) => {
   const reviews = await prisma.review.findMany({
     where: {
       movieId,
+      userId
     },
     include: {
       _count: {
@@ -333,7 +334,6 @@ const approvedUnApprovedReview = async (
 
 const deleteReview = async (user: Partial<User>, reviewId: string) => {
   let movieId: string = '';
-
   const result = await prisma.$transaction(async (tx) => {
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { email: user?.email },
