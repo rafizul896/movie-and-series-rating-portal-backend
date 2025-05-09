@@ -16,6 +16,7 @@ const addAMovie = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 const getAllMovie = catchAsync(async (req: Request, res: Response) => {
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
   const filters = pick(req.query, [
