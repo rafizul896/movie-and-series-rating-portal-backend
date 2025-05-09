@@ -132,3 +132,12 @@ npm run dev
 └── 📄 README.md              # Project documentation
 
 ```
+---
+
+## 🌐 Deployment
+
+- Hosted on **Vercel** (Backend & Frontend)
+- **PostgreSQL** database hosted via **Vercel** 
+
+
+---
