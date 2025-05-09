@@ -70,6 +70,7 @@ import AppError from '../../error/AppError';
 // };
 
 const getAllPurchasedMoviesByUser = async (email: string) => {
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -87,8 +88,7 @@ const getAllPurchasedMoviesByUser = async (email: string) => {
       createdAt: true,
       movies: true
     }
-    
-  });
+  })
 
   return result;
 };

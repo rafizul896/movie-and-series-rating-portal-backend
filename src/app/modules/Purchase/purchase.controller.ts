@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { PurchaseServices } from './purchase.service';
 import pick from '../../shared/pick';
+import { createManyWatchlistFromPurchases } from './purchase.utils';
 
 const createPurchase = catchAsync(async (req, res) => {
   const result = await PurchaseServices.createPurchase(req.body);
@@ -15,8 +16,20 @@ const createPurchase = catchAsync(async (req, res) => {
   });
 });
 const createManyPurchase = catchAsync(async (req, res) => {
-  const result = await PurchaseServices.createManyPurchase(req.body);
+  const payloads = req.body;
 
+   // Step 1: Create purchases
+  const result = await PurchaseServices.createManyPurchase(payloads);
+
+  // Step 2: Prepare payloads for watchlist
+  const watchlistPayloads = payloads.map((p: any) => ({
+    userId: p.userId,
+    movieId: p.movieId,
+  }));
+
+  // Step 3: Create watchlists
+  await createManyWatchlistFromPurchases(watchlistPayloads);
+  
   sendResponse(res, {
     statusCode: status.OK,
     success: true,

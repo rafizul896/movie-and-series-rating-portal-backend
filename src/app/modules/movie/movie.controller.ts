@@ -24,6 +24,7 @@ const getAllMovie = catchAsync(async (req: Request, res: Response) => {
     'searchTerm',
     'title',
     'rating',
+    'isTrending'
   ]);
   const result = await movieService.getAllMovie(filters, options);
 

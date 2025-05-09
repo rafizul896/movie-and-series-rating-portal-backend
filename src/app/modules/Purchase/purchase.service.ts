@@ -96,7 +96,6 @@ const getPurchasesHistory = async (params: any,
     const { ...filterData } = params;
   
     const andConditions: Prisma.PurchaseWhereInput[] = [];
-
     // Filter by purchase_type and paymentStatus
     if (Object.keys(filterData).length > 0) {
       andConditions.push({
