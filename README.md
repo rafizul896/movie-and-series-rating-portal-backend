@@ -97,3 +97,38 @@ npm run dev
 ```
 
 ---
+
+
+## 📁 Folder Structure
+
+```
+📦 project-root/
+├── 📁 node_modules/          # npm packages (auto-generated)
+├── 📁 prisma/                # Prisma configuration
+│   ├── 📁 migrations/        # DB migration history
+│   └── 📄 schema.prisma      # DB schema definition
+├── 📁 src/                   # Main source code
+│   ├── 📄 app.ts             # App-level Express config
+│   ├── 📄 server.ts          # Entry point to run the server
+│   ├── 📁 app/               # App initialization logic
+│   ├── 📁 config/            # Config files (DB, JWT, etc.)
+│   ├── 📁 error/             # Custom error handling
+│   ├── 📁 helpers/           # Helper functions
+│   ├── 📁 interface/         # TypeScript interfaces/types
+│   ├── 📁 middlewares/       # Express middlewares
+│   ├── 📁 modules/           # Domain-based features (e.g., user, media)
+│   ├── 📁 routes/            # Route declarations
+│   ├── 📁 shared/            # Shared constants, enums, etc.
+│   └── 📁 utils/             # Common utility functions
+├── 📄 .env                   # Environment variables
+├── 📄 .env.example           # Sample .env file
+├── 📄 .gitignore             # Git ignore rules
+├── 📄 .prettierrc            # Prettier config
+├── 📄 .prettierignore        # Prettier ignore rules
+├── 📄 eslint.config.mjs     # ESLint configuration
+├── 📄 package.json           # Project info and scripts
+├── 📄 package-lock.json      # Exact version lock file
+├── 📄 tsconfig.json          # TypeScript config
+└── 📄 README.md              # Project documentation
+
+```
