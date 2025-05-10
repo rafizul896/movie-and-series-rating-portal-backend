@@ -82,20 +82,27 @@ const getAllMovie = async (
 
   // Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => {
-        const value = (filterData as any)[key];
+  andConditions.push({
+    AND: Object.keys(filterData).map((key) => {
+      const value = (filterData as any)[key];
+      if (value === 'true' || value === 'false') {
+        return {
+          [key]: Boolean(value),
+        };
+      } else {
         const valuesArray = String(value)
           .split(',')
           .map((v) => v.trim());
+
         return {
           [key]: {
             hasSome: valuesArray,
           },
         };
-      }),
-    });
-  }
+      }
+    }),
+  });
+}
 
   let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
     createdAt: 'asc',
@@ -168,7 +175,6 @@ const getAMovie = async (
   const reviewWhereConditions = {
     OR: reviewOrConditions,
     movieId: id,
-    // user: { status: UserStatus.ACTIVE },
   };
 
   //  Step 2: Fetch movie details with paginated reviews
@@ -189,11 +195,10 @@ const getAMovie = async (
       streamingLink: true,
       isTrending: true,
       thumbnail: true,
-      discountPrice: true,
-
+      discountPercentage: true,
       avgRating: true,
       reviewCount: true,
-      totalRating : true,
+      totalRating: true,
       likesCount: true,
       createdAt: true,
       updatedAt: true,
@@ -223,6 +228,12 @@ const getAMovie = async (
               profileImage: true,
             },
           },
+          likes: {
+            select: {
+              userId: true, // necessary for matching with logged-in user
+            },
+          },
+          comments: true,
           _count: {
             select: {
               likes: true,
@@ -238,7 +249,18 @@ const getAMovie = async (
     throw new AppError(404, 'Movie not found');
   }
 
-  //  Step 3: Count total reviews for pagination
+  // Step 2.5: Add isLikedByUser to each review
+  const reviewsWithIsLiked = result.reviews.map((rev) => {
+    const isLikedByUser = userId
+      ? rev.likes.some((like) => like.userId === userId)
+      : false;
+    return {
+      ...rev,
+      isLikedByUser,
+    };
+  });
+
+  // Step 3: Count total reviews for pagination
   const total = await prisma.review.count({
     where: reviewWhereConditions,
   });
@@ -249,9 +271,13 @@ const getAMovie = async (
       limit,
       TotalReview: total,
     },
-    data: result,
+    data: {
+      ...result,
+      reviews: reviewsWithIsLiked,
+    },
   };
 };
+
 
 const updateAMovie = async (
   id: string,

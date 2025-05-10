@@ -2,8 +2,10 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
+import { Request, Response } from 'express';
+import { TUser } from '../../interface/user.type';
 
-const loginUser = catchAsync(async (req, res) => {
+const loginUser = catchAsync(async (req:Request, res:Response) => {
   const result = await AuthServices.loginUser(req.body);
 
   res.cookie('refreshToken', result.refreshToken, {
@@ -19,7 +21,7 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
-const refreshToken = catchAsync(async (req, res) => {
+const refreshToken = catchAsync(async (req:Request, res:Response) => {
   const { refreshToken } = req.cookies;
   const result = await AuthServices.refreshToken(refreshToken);
 
@@ -31,8 +33,8 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-const changePassword = catchAsync(async (req, res) => {
-  const user = req.user;
+const changePassword = catchAsync(async (req:Request, res:Response) => {
+  const user = req.user as TUser;
   const result = await AuthServices.changePassword(user, req.body);
 
   sendResponse(res, {
@@ -43,7 +45,7 @@ const changePassword = catchAsync(async (req, res) => {
   });
 });
 
-const forgotPassword = catchAsync(async (req, res) => {
+const forgotPassword = catchAsync(async (req:Request, res:Response) => {
   const result = await AuthServices.forgotPassword(req.body);
 
   sendResponse(res, {
@@ -54,7 +56,7 @@ const forgotPassword = catchAsync(async (req, res) => {
   });
 });
 
-const resetPassword = catchAsync(async (req, res) => {
+const resetPassword = catchAsync(async (req:Request, res:Response) => {
   const token = req.headers.authorization || "";
   const result = await AuthServices.resetPassword(token,req.body);
 
