@@ -42,7 +42,7 @@ CREATE TABLE "movies" (
     "platforms" TEXT[],
     "buyPrice" DOUBLE PRECISION NOT NULL,
     "rentPrice" DOUBLE PRECISION NOT NULL,
-    "discountPrice" DOUBLE PRECISION,
+    "discountPercentage" DOUBLE PRECISION,
     "thumbnail" TEXT NOT NULL,
     "streamingLink" TEXT NOT NULL,
     "isTrending" BOOLEAN NOT NULL DEFAULT false,

@@ -2,8 +2,10 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { wishlistServices } from './wishlist.service';
+import { Request, Response } from 'express';
+import { TUser } from '../../interface/user.type';
 
-const createWishlist = catchAsync(async (req, res) => {
+const createWishlist = catchAsync(async (req:Request, res:Response) => {
   const result = await wishlistServices.createWishlist(req.body);
 
   sendResponse(res, {
@@ -14,7 +16,7 @@ const createWishlist = catchAsync(async (req, res) => {
   });
 });
 
-const getAllWishlistByUser = catchAsync(async (req, res) => {
+const getAllWishlistByUser = catchAsync(async (req:Request, res:Response) => {
   const result = await wishlistServices.getAllWishlistByUser(req?.user?.email);
 
   sendResponse(res, {
@@ -25,7 +27,7 @@ const getAllWishlistByUser = catchAsync(async (req, res) => {
   });
 });
 
-const deleteWishlistItem = catchAsync(async (req, res) => {
+const deleteWishlistItem = catchAsync(async (req:Request, res:Response) => {
   const { id } = req.params;
   const result = await wishlistServices.deleteWishlistItem(id);
 
@@ -37,8 +39,21 @@ const deleteWishlistItem = catchAsync(async (req, res) => {
   });
 });
 
+const deleteManyWishlistItem = catchAsync(async (req:Request, res:Response) => {
+  const user = req.user as TUser;
+  const result = await wishlistServices.deleteManyWishlistItem(user.id);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Wishlist items is deleted successfully',
+    data: result,
+  });
+});
+
 export const wishlistControllers = {
   createWishlist,
   getAllWishlistByUser,
   deleteWishlistItem,
+  deleteManyWishlistItem,
 };

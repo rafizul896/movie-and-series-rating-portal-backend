@@ -41,7 +41,7 @@ model Movie {
   platforms     String[]
   buyPrice      Float
   rentPrice     Float
-  discountPrice Float?
+  discountPercentage Float?
   thumbnail     String
   streamingLink String
   reviews       Review[]
@@ -91,7 +91,7 @@ model Comment {
   user     User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId   String
 
-  review   Review @relation(fields: [reviewId], references: [id])
+  review   Review @relation(fields: [reviewId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   reviewId String
 
   createdAt DateTime @default(now())
@@ -104,8 +104,9 @@ model Like {
   id       String @id @default(uuid())
   user     User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId   String
-  review   Review @relation(fields: [reviewId], references: [id])
+  review   Review @relation(fields: [reviewId], references: [id] , onUpdate: Cascade, onDelete: Cascade)
   reviewId String
+  isLiked  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,12 +115,26 @@ model Like {
   @@map("likes")
 }
 
+// model Watchlist {
+//   id      String @id @default(uuid())
+//   userId  String
+//   movieId String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   users  User  @relation(fields: [userId], references: [id])
+//   movies Movie @relation(fields: [movieId], references: [id])
+
+//   @@unique([userId, movieId])
+//   @@map("watchlists")
+// }
 model Watchlist {
-  id      String @id @default(uuid())
-  userId  String
-  movieId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String
+  // videoUrl  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   users  User  @relation(fields: [userId], references: [id])
   movies Movie @relation(fields: [movieId], references: [id])

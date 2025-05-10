@@ -19,10 +19,12 @@ router.get(
   wishlistControllers.getAllWishlistByUser,
 );
 
+router.delete('/:id', wishlistControllers.deleteWishlistItem);
+
 router.delete(
-  '/:id',
-  auth(UserRole.USER, UserRole.ADMIN),
-  wishlistControllers.deleteWishlistItem,
+  '/',
+  auth(UserRole.ADMIN, UserRole.USER),
+  wishlistControllers.deleteManyWishlistItem,
 );
 
 export const WishlistRoutes = router;

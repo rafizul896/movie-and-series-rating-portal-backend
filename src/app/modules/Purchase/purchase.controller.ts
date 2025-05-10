@@ -2,6 +2,8 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { PurchaseServices } from './purchase.service';
+import pick from '../../shared/pick';
+import { createManyWatchlistFromPurchases } from './purchase.utils';
 
 const createPurchase = catchAsync(async (req, res) => {
   const result = await PurchaseServices.createPurchase(req.body);
@@ -13,10 +15,48 @@ const createPurchase = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const createManyPurchase = catchAsync(async (req, res) => {
+  const payloads = req.body;
+
+   // Step 1: Create purchases
+  const result = await PurchaseServices.createManyPurchase(payloads);
+
+  // Step 2: Prepare payloads for watchlist
+  const watchlistPayloads = payloads.map((p: any) => ({
+    userId: p.userId,
+    movieId: p.movieId,
+  }));
+
+  // Step 3: Create watchlists
+  await createManyWatchlistFromPurchases(watchlistPayloads);
+  
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Purchase successful!',
+    data: result,
+  });
+});
 
 const getPurchasesByUser = catchAsync(async (req, res) => {
   const email = req?.user?.email;
   const result = await PurchaseServices.getPurchasesByUser(email);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: 'Purchase history fetched successfully',
+    data: result,
+  });
+});
+
+const getPurchasesHistory = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, [
+    'paymentStatus',
+    'purchase_type',
+  ]);
+  const result = await PurchaseServices.getPurchasesHistory(filters,options);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -75,9 +115,11 @@ const getMovieWiseSales = catchAsync(async (req, res) => {
 
 export const PurchaseControllers = {
   createPurchase,
+  createManyPurchase,
   getPurchasesByUser,
   updatePurchase,
   deletePurchase,
   getPurchaseAnalytics,
   getMovieWiseSales,
+  getPurchasesHistory
 };

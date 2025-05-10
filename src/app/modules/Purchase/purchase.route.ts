@@ -13,6 +13,11 @@ router.post(
   PurchaseControllers.createPurchase,
 );
 
+router.post(
+  '/many-purchase',
+  PurchaseControllers.createManyPurchase,
+);
+
 router.get(
   '/',
   auth(UserRole.USER, UserRole.ADMIN),
@@ -31,6 +36,11 @@ router.delete(
   PurchaseControllers.deletePurchase,
 );
 
+router.get(
+  '/purchase-history',
+  auth(UserRole.ADMIN),
+  PurchaseControllers.getPurchasesHistory,
+);
 router.get(
   '/purchase-analytics',
   // auth(UserRole.ADMIN),

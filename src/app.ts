@@ -7,7 +7,11 @@ import { globalErrorHandler } from './app/error/globalErrorHandler';
 const app: Application = express();
 
 const corseOptions = {
-  origin: true,
+  origin: [
+    'http://localhost:3000',
+    'https://movie-and-series-rating-portal-frontend.vercel.app',
+    'https://flimnest.vercel.app'
+  ],
   credentials: true,
 };
 
