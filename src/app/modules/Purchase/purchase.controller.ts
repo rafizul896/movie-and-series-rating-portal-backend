@@ -91,7 +91,7 @@ const deletePurchase = catchAsync(async (req, res) => {
 });
 
 const getPurchaseAnalytics = catchAsync(async (req, res) => {
-  const result = await PurchaseServices.getPurchaseAnalytics(req.query);
+  const result = await PurchaseServices.getPurchaseAnalytics();
 
   sendResponse(res, {
     statusCode: status.OK,
