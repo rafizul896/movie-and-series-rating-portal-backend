@@ -2,10 +2,7 @@ import status from 'http-status';
 import prisma from '../../shared/prisma';
 import AppError from '../../error/AppError';
 
-const createWishlist = async (payload: {
-  userId: string;
-  movieId: string;
-}) => {
+const createWishlist = async (payload: { userId: string; movieId: string }) => {
   const exist = await prisma.wishlist.findFirst({
     where: {
       userId: payload.userId,
@@ -35,9 +32,25 @@ const getAllWishlistByUser = async (email: string) => {
     where: {
       userId: userData?.id,
     },
+    include: {
+      movies: true,
+    },
   });
 
-  return result;
+  // format
+  const formatted = result.map((item) => ({
+    id: item.id,
+    movieId: item.movies.id,
+    title: item.movies.title,
+    image: item.movies.thumbnail,
+    buyPrice: item.movies.buyPrice,
+    rentPrice: item.movies.rentPrice,
+    discountPercentage: item.movies.discountPercentage,
+    purchaseType: 'BUY',
+    type: item.movies.type,
+  }));
+
+  return formatted;
 };
 
 const deleteWishlistItem = async (id: string) => {
@@ -49,9 +62,19 @@ const deleteWishlistItem = async (id: string) => {
 
   return result;
 };
+const deleteManyWishlistItem = async (userId: string) => {
+  const result = await prisma.wishlist.deleteMany({
+    where: {
+      userId,
+    },
+  });
+
+  return result;
+};
 
 export const wishlistServices = {
   createWishlist,
   getAllWishlistByUser,
   deleteWishlistItem,
+  deleteManyWishlistItem,
 };
