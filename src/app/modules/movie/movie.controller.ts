@@ -35,6 +35,25 @@ const getAllMovie = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getAllMovieByAdmin = catchAsync(async (req: Request, res: Response) => {
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, [
+    'genres',
+    'platforms',
+    'searchTerm',
+    'title',
+    'rating',
+    'isTrending'
+  ]);
+  const result = await movieService.getAllMovieByAdmin(filters, options);
+
+  sendResponse(res, {
+    statusCode: status.CREATED,
+    success: true,
+    message: 'Retrieve all movie data successfully',
+    data: result,
+  });
+});
 
 const getAMovie = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -81,4 +100,5 @@ export const movieController = {
   getAMovie,
   updateAMovie,
   deleteAMovie,
+  getAllMovieByAdmin
 };
