@@ -62,51 +62,6 @@ const getSingleReview = async (reviewId: string) => {
   });
   return result;
 };
-
-// const getReviewsByMovieId = async (movieId: string) => {
-//   // Check if the movie exists
-//   const movieExists = await prisma.movie.findUnique({
-//     where: { id: movieId, isDeleted: false },
-//   });
-//   if (!movieExists) {
-//     throw new AppError(404, 'Movie not found');
-//   }
-//   const result = await prisma.review.findMany({
-//     where: {
-//       movieId,
-//     },
-//     include: {
-//       _count: {
-//         select: {
-//           likes: true,
-//           comments: true,
-//         },
-//       },
-//       comments: {
-//         select: {
-//           id: true,
-//           content: true,
-//           userId: true,
-//         },
-//       },
-//       likes: {
-//         select: {
-//           id: true,
-//           userId: true,
-//         },
-//       },
-//       user: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//         },
-//       },
-//     },
-//   });
-//   return result;
-// };
-
 const getReviewsByMovieId = async (movieId: string, userId?: string) => {
   const movieExists = await prisma.movie.findUnique({
     where: { id: movieId, isDeleted: false },
@@ -118,6 +73,7 @@ const getReviewsByMovieId = async (movieId: string, userId?: string) => {
   const reviews = await prisma.review.findMany({
     where: {
       movieId,
+      userId
     },
     include: {
       _count: {
@@ -333,7 +289,6 @@ const approvedUnApprovedReview = async (
 
 const deleteReview = async (user: Partial<User>, reviewId: string) => {
   let movieId: string = '';
-
   const result = await prisma.$transaction(async (tx) => {
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { email: user?.email },
@@ -355,9 +310,7 @@ const deleteReview = async (user: Partial<User>, reviewId: string) => {
     if (!isAdmin && review.approved) {
       throw new AppError(403, 'You cannot delete an approved review');
     }
-
     movieId = review.movieId;
-    // Delete related comments first
     await tx.comment.deleteMany({
       where: { reviewId: review.id },
     });
