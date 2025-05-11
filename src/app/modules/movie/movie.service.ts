@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Movie, Prisma } from '@prisma/client';
 import prisma from '../../shared/prisma';
@@ -32,6 +33,125 @@ const addAMovie = async (movieData: Movie, file: any) => {
 // Streaming platform (e.g., Netflix, Disney+)
 
 const getAllMovie = async (
+  params: TMovieFilterRequest,
+  options: IPaginationOptions,
+) => {
+  const { page } = paginationHelper.calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+
+  const andConditions: Prisma.MovieWhereInput[] = [];
+
+  if (params?.searchTerm) {
+    andConditions.push({
+      OR: movieSearchAbleFields.map(({ field, operator }) => {
+        if (operator === 'equals') {
+          const numericValue =
+            typeof searchTerm === 'number'
+              ? searchTerm
+              : parseInt(String(searchTerm));
+          if (isNaN(numericValue)) return {};
+          return {
+            [field]: {
+              equals: numericValue,
+            },
+          };
+        }
+
+        if (operator === 'hasSome') {
+          const arrayValue = [String(searchTerm)];
+
+          return {
+            [field]: {
+              hasSome: arrayValue,
+            },
+          };
+        }
+
+        if (operator === 'contains') {
+          return {
+            [field]: {
+              contains: String(searchTerm),
+              mode: 'insensitive',
+            },
+          };
+        }
+
+        return {};
+      }),
+    });
+  }
+
+  // Filter by genres, platforms, and rating
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => {
+        const value = (filterData as any)[key];
+        if (value === 'true' || value === 'false') {
+          return {
+            [key]: Boolean(value),
+          };
+        } else {
+          const valuesArray = String(value)
+            .split(',')
+            .map((v) => v.trim());
+
+          return {
+            [key]: {
+              hasSome: valuesArray,
+            },
+          };
+        }
+      }),
+    });
+  }
+
+  let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
+    createdAt: 'asc',
+  }; // default
+
+  if (options.sortBy) {
+    switch (options.sortBy) {
+      case 'topRated':
+        orderByCondition = { avgRating: 'desc' };
+        break;
+      case 'mostReviewed':
+        orderByCondition = { reviewCount: 'desc' };
+        break;
+      case 'latest':
+        orderByCondition = { createdAt: 'desc' };
+        break;
+      default:
+        if (options.sortOrder) {
+          orderByCondition = { [options.sortBy]: options.sortOrder };
+        }
+        break;
+    }
+  }
+
+  andConditions.push({
+    isDeleted: false,
+  });
+
+  const whereConditions: Prisma.MovieWhereInput = { AND: andConditions };
+
+  const result = await prisma.movie.findMany({
+    where: whereConditions,
+    orderBy: orderByCondition,
+  });
+
+  const total = await prisma.movie.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      total,
+    },
+    data: result,
+  };
+};
+const getAllMovieByAdmin = async (
   params: TMovieFilterRequest,
   options: IPaginationOptions,
 ) => {
@@ -82,27 +202,27 @@ const getAllMovie = async (
 
   // Filter by genres, platforms, and rating
   if (Object.keys(filterData).length > 0) {
-  andConditions.push({
-    AND: Object.keys(filterData).map((key) => {
-      const value = (filterData as any)[key];
-      if (value === 'true' || value === 'false') {
-        return {
-          [key]: Boolean(value),
-        };
-      } else {
-        const valuesArray = String(value)
-          .split(',')
-          .map((v) => v.trim());
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => {
+        const value = (filterData as any)[key];
+        if (value === 'true' || value === 'false') {
+          return {
+            [key]: Boolean(value),
+          };
+        } else {
+          const valuesArray = String(value)
+            .split(',')
+            .map((v) => v.trim());
 
-        return {
-          [key]: {
-            hasSome: valuesArray,
-          },
-        };
-      }
-    }),
-  });
-}
+          return {
+            [key]: {
+              hasSome: valuesArray,
+            },
+          };
+        }
+      }),
+    });
+  }
 
   let orderByCondition: Prisma.MovieOrderByWithRelationInput = {
     createdAt: 'asc',
@@ -233,7 +353,21 @@ const getAMovie = async (
               userId: true, // necessary for matching with logged-in user
             },
           },
-          comments: true,
+          comments: {
+            select: {
+              id: true,
+              content: true,
+              approved: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  profileImage: true,
+                },
+              },
+            },
+          },
           _count: {
             select: {
               likes: true,
@@ -277,7 +411,6 @@ const getAMovie = async (
     },
   };
 };
-
 
 const updateAMovie = async (
   id: string,
@@ -332,4 +465,5 @@ export const movieService = {
   getAMovie,
   updateAMovie,
   deleteAMovie,
+  getAllMovieByAdmin,
 };

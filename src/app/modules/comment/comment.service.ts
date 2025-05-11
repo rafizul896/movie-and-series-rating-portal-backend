@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Comment, User, UserRole, UserStatus } from '@prisma/client';
 import prisma from '../../shared/prisma';
@@ -107,46 +106,37 @@ const getUnApprovedComments = async (options: IPaginationOptions) => {
 };
 
 // Approve/Unpublish Comments
-const approvedUnApprovedComments = async (commentsId: string[]) => {
-
+const approvedUnApprovedComments = async (commentsId: string) => {
   const result = await prisma.$transaction(async (tx) => {
-    const comments = await tx.comment.findMany({
+    const comment = await tx.comment.findFirstOrThrow({
       where: {
-        id: {
-          in: commentsId,
-        },
+        id: commentsId,
       },
     });
 
-    if (!comments || comments.length === 0) {
-      throw new AppError(403, 'Comments not found');
+    if (!comment) {
+      throw new AppError(403, 'Comment not found');
     }
-
+    console.log(comment);
     // Toggle each comment's approval
-    const updatedComments = await Promise.all(
-      comments.map(async (comment) => {
-        return await tx.comment.update({
-          where: { id: comment.id },
-          data: {
-            approved: !comment.approved, // toggle logic
-          },
-        });
-      })
-    );
+    const updatedComment = await tx.comment.update({
+      where: { id: comment.id },
+      data: {
+        approved: !comment.approved, // toggle logic
+      },
+    });
 
-    return updatedComments;
+    return updatedComment;
   });
 
   return result;
 };
 
-
-const deleteComments = async (user: Partial<User>,commentIds: string[]) => {
+const deleteComments = async (user: Partial<User>, commentIds: string[]) => {
   if (!commentIds || commentIds.length === 0) {
     throw new Error('No comment IDs provided.');
   }
   const result = await prisma.$transaction(async (tx) => {
-
     const checkUser = await tx.user.findUniqueOrThrow({
       where: { id: user?.id },
     });
@@ -160,30 +150,28 @@ const deleteComments = async (user: Partial<User>,commentIds: string[]) => {
           in: commentIds,
         },
         ...(isAdmin ? {} : { userId: checkUser.id }),
-      }
-    })
+      },
+    });
 
     if (!comments || comments.length === 0) {
       throw new AppError(404, 'Comments not found');
     }
-    
 
     const deletedComments = await Promise.all(
-      comments.map(async(comment) => {
+      comments.map(async (comment) => {
         return await tx.comment.delete({
           where: {
-            id: comment.id
-          }
-        })
-      })
-    )
+            id: comment.id,
+          },
+        });
+      }),
+    );
 
     return deletedComments;
   });
 
   return result;
 };
-
 
 // edit comments by user if the comments is not approved
 const editComment = async (
@@ -216,7 +204,7 @@ const editComment = async (
       where: {
         id: comment.id,
       },
-      data: {...existingComment,approved: false},
+      data: { ...existingComment, approved: false },
     });
 
     return updatedComment;
@@ -230,5 +218,5 @@ export const commentService = {
   getUnApprovedComments,
   approvedUnApprovedComments,
   deleteComments,
-  editComment
+  editComment,
 };

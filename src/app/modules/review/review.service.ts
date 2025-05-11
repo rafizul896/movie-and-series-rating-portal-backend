@@ -73,7 +73,7 @@ const getReviewsByMovieId = async (movieId: string, userId?: string) => {
   const reviews = await prisma.review.findMany({
     where: {
       movieId,
-      userId
+      userId,
     },
     include: {
       _count: {
@@ -169,6 +169,12 @@ const getReviews = async (
       content: true,
       approved: true,
       createdAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       movie: {
         select: {
           id: true,
