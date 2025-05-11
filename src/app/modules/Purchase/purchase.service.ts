@@ -174,41 +174,24 @@ const deletePurchase = async (id: string) => {
   return result;
 };
 
-type AnalyticsFilter = {
-  startDate?: string;
-  endDate?: string;
-};
 
-const getPurchaseAnalytics = async (filter: AnalyticsFilter = {}) => {
-  const { startDate, endDate } = filter;
-
-  const dateFilter: Prisma.PurchaseWhereInput = {};
-  if (startDate && endDate) {
-    dateFilter.purchasedAt = {
-      gte: new Date(startDate),
-      lte: new Date(endDate),
-    };
-  }
-
+const getPurchaseAnalytics = async () => {
   const [totalPurchases, totalRevenueAgg, rentalCount, buyCount] =
     await Promise.all([
-      prisma.purchase.count({ where: dateFilter }),
+      prisma.purchase.count(),
 
       prisma.purchase.aggregate({
-        where: dateFilter,
         _sum: { amount: true },
       }),
 
       prisma.purchase.count({
         where: {
-          ...dateFilter,
           purchase_type: 'RENT',
         },
       }),
 
       prisma.purchase.count({
         where: {
-          ...dateFilter,
           purchase_type: 'BUY',
         },
       }),
@@ -218,8 +201,7 @@ const getPurchaseAnalytics = async (filter: AnalyticsFilter = {}) => {
     totalRevenue: totalRevenueAgg._sum.amount || 0,
     totalPurchases,
     rentalCount,
-    buyCount,
-  };
+    buyCount};
 };
 
 const getMovieWiseSales = async (query: any) => {
