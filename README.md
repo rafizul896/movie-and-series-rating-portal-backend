@@ -14,7 +14,7 @@ It is built with **Node.js**, **Express.js**, and **Prisma ORM**, and handles al
 
 - 🚀 Frontend Repository: [movie-and-series-rating-portal-frontend](https://github.com/rafizul896/movie-and-series-rating-portal-frontend)
 - 🧠 Backend Repository: [movie-and-series-rating-portal-backend](https://github.com/rafizul896/movie-and-series-rating-portal-backend)
-- 🌐 Live Website: [https://your-deployed-site-url.com](https://your-deployed-site-url.com)
+- 🌐 Live Website: [https://movie-and-series-rating-portal-frontend.vercel.app](https://movie-and-series-rating-portal-frontend.vercel.app/)
  
  
 ---
