@@ -40,17 +40,6 @@ const getSingleReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
-//   const result = await reviewService.getReviewsByMovieId(req.params.movieId);
-
-//   sendResponse(res, {
-//     statusCode: status.CREATED,
-//     success: true,
-//     message: 'Retrieve reviews data by movieId successfully',
-//     data: result,
-//   });
-// });
-
 //updated get review by movie id to get the information of a user liked or not
 const getReviewsByMovieId = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as User | undefined;
