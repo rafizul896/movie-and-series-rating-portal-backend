@@ -274,6 +274,7 @@ const getAllMovieByAdmin = async (
   };
 };
 
+
 const getAMovie = async (
   id: string,
   options: IPaginationOptions,
