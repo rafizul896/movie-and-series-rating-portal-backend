@@ -25,9 +25,12 @@ model User {
   wishlists  Wishlist[]
   purchase   Purchase[]
 
+  // For newsletter subscription
+  newsletterSubscriber NewsletterSubscriber[]
+  // For coupon redemption
+  couponRedemptions     CouponRedemption[]
   @@map("users")
 }
-
 model Movie {
   id            String      @id @default(uuid())
   title         String
@@ -176,6 +179,69 @@ model Purchase {
 
   @@unique([userId, movieId])
   @@map("purchase")
+}
+
+// Add these models to your existing schema
+
+model Newsletter {
+  id             String     @id @default(uuid())
+  title          String
+  subject        String
+  content        String
+  status         String     @default("DRAFT") // DRAFT | SCHEDULED | SENT
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  recipientCount Int
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // Relationships
+  recipients     NewsletterRecipient[]
+}
+
+model NewsletterSubscriber {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String?
+  status       String     @default("ACTIVE") // ACTIVE | INACTIVE
+  subscribedAt DateTime   @default(now())
+  unsubscribedAt DateTime?
+  userId       String?
+  User         User?      @relation(fields: [userId], references: [id])
+  
+  newsletters  NewsletterRecipient[]
+}
+
+model NewsletterRecipient {
+  newsletterId String
+  subscriberId String
+  Newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+  Subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+  @@id([newsletterId, subscriberId])
+}
+
+model Coupon {
+  id             String     @id @default(uuid())
+  code           String     @unique
+  discountType   String     // PERCENTAGE or FIXED
+  discountValue  Float
+  maxUses        Int?
+  usedCount      Int        @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  redemptions    CouponRedemption[]
+}
+
+model CouponRedemption {
+  id        String   @id @default(uuid())
+  couponId  String
+  userId    String
+  usedAt    DateTime @default(now())
+  Coupon    Coupon   @relation(fields: [couponId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
 }
 
 enum PurchaseType {
