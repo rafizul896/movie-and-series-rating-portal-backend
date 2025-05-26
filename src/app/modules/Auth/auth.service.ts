@@ -126,8 +126,6 @@ const forgotPassword = async (payload: { email: string }) => {
     },
   });
 
-  console.log('user data', userData);
-
   if (!userData) {
     throw new AppError(status.NOT_FOUND, 'Invalid email id');
   }
@@ -162,7 +160,7 @@ const forgotPassword = async (payload: { email: string }) => {
     </div>
   `;
 
-  await sendEmail(userData.email, html);
+  await sendEmail(userData.email, html, "Forget password");
 };
 
 const resetPassword = async (
