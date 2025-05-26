@@ -3,6 +3,8 @@ import config from '../../config';
 import prisma from '../../shared/prisma';
 import { generateToken } from '../Auth/auth.utils';
 import { User, UserStatus } from '@prisma/client';
+import { IPaginationOptions } from '../../interface/pagination';
+import { paginationHelper } from '../../helpers/paginationHelpers';
 
 const createUser = async (data: any) => {
   const hashPassword = await bcrypt.hash(
@@ -44,9 +46,27 @@ const createUser = async (data: any) => {
   };
 };
 
-const getAllUsersFromDB = async () => {
-  const result = await prisma.user.findMany();
-  return result;
+const getAllUsersFromDB = async (options: IPaginationOptions) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const result = await prisma.user.findMany({
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: 'desc' },
+  });
+
+  const total = await prisma.user.count();
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const getUserByIdFromDB = async (id: string): Promise<User | null> => {

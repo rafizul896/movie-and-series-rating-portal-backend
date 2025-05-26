@@ -201,8 +201,7 @@ const getPurchaseAnalytics = async () => {
     totalRevenue: totalRevenueAgg._sum.amount || 0,
     totalPurchases,
     rentalCount,
-    buyCount,
-  };
+    buyCount};
 };
 
 const getMovieWiseSales = async (query: any) => {

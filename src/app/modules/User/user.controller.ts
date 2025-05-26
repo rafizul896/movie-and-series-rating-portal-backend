@@ -2,6 +2,7 @@ import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { UserService } from './user.service';
+import pick from '../../shared/pick';
 
 const createUser = catchAsync(async (req, res) => {
   const result = await UserService.createUser(req.body);
@@ -20,7 +21,8 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const getAllUsersFromDB = catchAsync(async (req, res) => {
-  const result = await UserService.getAllUsersFromDB();
+      const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const result = await UserService.getAllUsersFromDB(options);
 
   sendResponse(res, {
     statusCode: status.OK,
