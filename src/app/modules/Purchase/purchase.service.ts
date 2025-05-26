@@ -183,10 +183,6 @@ const deletePurchase = async (id: string) => {
   return result;
 };
 
-<<<<<<< HEAD
-=======
-
->>>>>>> dce3a441cde55fcd94dc1079f9891c61b98e6486
 const getPurchaseAnalytics = async () => {
   const [totalPurchases, totalRevenueAgg, rentalCount, buyCount] =
     await Promise.all([
