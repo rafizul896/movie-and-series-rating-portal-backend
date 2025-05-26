@@ -46,7 +46,7 @@ const getUnApprovedComments = catchAsync(
 
 const approvedUnapprovedComments = catchAsync(
   async (req: Request, res: Response) => {
-    const commentIds = req.body.commentIds as string[];
+    const commentIds = req.body.commentIds as string;
     const result = await commentService.approvedUnApprovedComments(commentIds);
 
     sendResponse(res, {
@@ -59,7 +59,7 @@ const approvedUnapprovedComments = catchAsync(
 );
 
 const deleteComments = catchAsync(async (req: Request, res: Response) => {
-  const commentIds = req.body.commentIds as string[];
+  const commentIds = req.body as string[];
   const user = req.user as User;
 
   const result = await commentService.deleteComments(user,commentIds);

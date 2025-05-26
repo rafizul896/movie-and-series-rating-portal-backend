@@ -84,6 +84,14 @@ const getPurchasesByUser = async (email: string) => {
     where: {
       userId: userData?.id,
     },
+    include:{
+      movie: {
+        select: {
+          title: true,
+          
+        },
+      },
+    }
   });
 
   return result;
@@ -175,6 +183,10 @@ const deletePurchase = async (id: string) => {
   return result;
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dce3a441cde55fcd94dc1079f9891c61b98e6486
 const getPurchaseAnalytics = async () => {
   const [totalPurchases, totalRevenueAgg, rentalCount, buyCount] =
     await Promise.all([
@@ -201,8 +213,7 @@ const getPurchaseAnalytics = async () => {
     totalRevenue: totalRevenueAgg._sum.amount || 0,
     totalPurchases,
     rentalCount,
-    buyCount,
-  };
+    buyCount};
 };
 
 const getMovieWiseSales = async (query: any) => {

@@ -12,10 +12,17 @@ commentRoutes.post("/",auth(UserRole.USER, UserRole.ADMIN),validationRequest(Com
 commentRoutes.get("/", commentsController.getUnApprovedComments)
 commentRoutes.get("/:reviewId", commentsController.getCommentsByReview)
 
-commentRoutes.patch("/approve-toggle", validationRequest(CommentsValidation.CommentIDsSchema),auth(UserRole.ADMIN), commentsController.approvedUnapprovedComments)
+commentRoutes.patch("/approve-toggle", 
+    // validationRequest(CommentsValidation.CommentIDsSchema),
+    auth(UserRole.ADMIN),
+ commentsController.approvedUnapprovedComments)
 
-commentRoutes.patch("/:commentId",auth(UserRole.USER),validationRequest(CommentsValidation.updateCommentZodSchema), commentsController.editComment) // Edit comment (if unpublished)
+commentRoutes.patch("/:commentId",auth(UserRole.USER),
+validationRequest(CommentsValidation.updateCommentZodSchema),
+ commentsController.editComment) // Edit comment (if unpublished)
 
-commentRoutes.delete("/delete-comments",auth(UserRole.ADMIN,UserRole.USER),validationRequest(CommentsValidation.CommentIDsSchema), commentsController.deleteComments)
+commentRoutes.delete("/delete-comments",auth(UserRole.ADMIN,UserRole.USER),
+// validationRequest(CommentsValidation.CommentIDsSchema),
+ commentsController.deleteComments)
 
 export default commentRoutes;
