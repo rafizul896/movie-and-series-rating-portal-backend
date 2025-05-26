@@ -28,36 +28,38 @@ model User {
   // For newsletter subscription
   newsletterSubscriber NewsletterSubscriber[]
   // For coupon redemption
-  couponRedemptions     CouponRedemption[]
+  couponRedemptions    CouponRedemption[]
+
   @@map("users")
 }
-model Movie {
-  id            String      @id @default(uuid())
-  title         String
-  synopsis      String
-  genres        String[]
-  type          MediaType   @default(MOVIE)
-  releaseYear   Int
-  isDeleted     Boolean     @default(false)
-  director      String
-  cast          String[]
-  platforms     String[]
-  buyPrice      Float
-  rentPrice     Float
-  discountPercentage Float?
-  thumbnail     String
-  streamingLink String
-  reviews       Review[]
-  isTrending    Boolean   @default(false)
 
-  totalRating Int @default(0)
+model Movie {
+  id                 String    @id @default(uuid())
+  title              String
+  synopsis           String
+  genres             String[]
+  type               MediaType @default(MOVIE)
+  releaseYear        Int
+  isDeleted          Boolean   @default(false)
+  director           String
+  cast               String[]
+  platforms          String[]
+  buyPrice           Float
+  rentPrice          Float
+  discountPercentage Float?
+  thumbnail          String
+  streamingLink      String
+  reviews            Review[]
+  isTrending         Boolean   @default(false)
+
+  totalRating Int   @default(0)
   avgRating   Float @default(0.0)
   reviewCount Int   @default(0)
   likesCount  Int   @default(0)
 
   watchlists Watchlist[]
   purchase   Purchase[]
-  wishlists     Wishlist[]
+  wishlists  Wishlist[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
@@ -104,10 +106,10 @@ model Comment {
 }
 
 model Like {
-  id       String @id @default(uuid())
-  user     User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id       String  @id @default(uuid())
+  user     User    @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId   String
-  review   Review @relation(fields: [reviewId], references: [id] , onUpdate: Cascade, onDelete: Cascade)
+  review   Review  @relation(fields: [reviewId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   reviewId String
   isLiked  Boolean @default(false)
 
@@ -136,8 +138,8 @@ model Watchlist {
   userId    String
   movieId   String
   // videoUrl  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users  User  @relation(fields: [userId], references: [id])
   movies Movie @relation(fields: [movieId], references: [id])
@@ -184,64 +186,91 @@ model Purchase {
 // Add these models to your existing schema
 
 model Newsletter {
-  id             String     @id @default(uuid())
+  id             String    @id @default(uuid())
   title          String
   subject        String
   content        String
-  status         String     @default("DRAFT") // DRAFT | SCHEDULED | SENT
+  status         NewsletterStatus    @default(DRAFT) // DRAFT | SCHEDULED | SENT
+  isScheduled    Boolean   @default(false)
   scheduledAt    DateTime?
   sentAt         DateTime?
   recipientCount Int
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   // Relationships
-  recipients     NewsletterRecipient[]
+  recipients NewsletterRecipient[]
+
+  @@map("newsletters")
 }
 
 model NewsletterSubscriber {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  name         String?
-  status       String     @default("ACTIVE") // ACTIVE | INACTIVE
-  subscribedAt DateTime   @default(now())
+  id             String    @id @default(uuid())
+  email          String    @unique
+  name           String?
+  status         NewsletterSubscriberStatus    @default(ACTIVE) // ACTIVE | INACTIVE
+  subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
-  userId       String?
-  User         User?      @relation(fields: [userId], references: [id])
-  
-  newsletters  NewsletterRecipient[]
+  userId         String?
+  User           User?     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt @default(now())
+
+  newsletters NewsletterRecipient[]
+
+
+  @@map("newsletter_subscribers")
 }
 
 model NewsletterRecipient {
   newsletterId String
   subscriberId String
-  Newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
-  Subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+  Newsletter   Newsletter           @relation(fields: [newsletterId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id] , onUpdate: Cascade, onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   @@id([newsletterId, subscriberId])
+  @@map("newsletter_recipients")
 }
 
 model Coupon {
-  id             String     @id @default(uuid())
-  code           String     @unique
-  discountType   String     // PERCENTAGE or FIXED
-  discountValue  Float
-  maxUses        Int?
-  usedCount      Int        @default(0)
-  expiresAt      DateTime?
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id            String    @id @default(uuid())
+  code          String    @unique
+  discountType  String // PERCENTAGE or FIXED
+  discountValue Float
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  redemptions    CouponRedemption[]
+  redemptions CouponRedemption[]
+
+  @@map("coupons")
 }
 
 model CouponRedemption {
-  id        String   @id @default(uuid())
-  couponId  String
-  userId    String
-  usedAt    DateTime @default(now())
-  Coupon    Coupon   @relation(fields: [couponId], references: [id])
-  User      User     @relation(fields: [userId], references: [id])
+  id       String   @id @default(uuid())
+  couponId String
+  userId   String
+  usedAt   DateTime @default(now())
+  Coupon   Coupon   @relation(fields: [couponId], references: [id])
+  User     User     @relation(fields: [userId], references: [id])
+
+  @@map("coupon_redemptions")
+}
+
+enum NewsletterSubscriberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum NewsletterStatus {
+  DRAFT
+  SCHEDULED
+  SENT
 }
 
 enum PurchaseType {
