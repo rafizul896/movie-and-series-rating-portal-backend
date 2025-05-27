@@ -105,6 +105,7 @@ const changePassword = async (user: JwtPayload, payload: any) => {
     payload.newPassword,
     Number(config.BCRYPT_SALt_ROUNDS),
   );
+  
 
   await prisma.user.update({
     where: {
@@ -125,8 +126,6 @@ const forgotPassword = async (payload: { email: string }) => {
       status: UserStatus.ACTIVE,
     },
   });
-
-  console.log('user data', userData);
 
   if (!userData) {
     throw new AppError(status.NOT_FOUND, 'Invalid email id');
@@ -162,7 +161,7 @@ const forgotPassword = async (payload: { email: string }) => {
     </div>
   `;
 
-  await sendEmail(userData.email, html);
+  await sendEmail(userData.email, html, "Forget password");
 };
 
 const resetPassword = async (
