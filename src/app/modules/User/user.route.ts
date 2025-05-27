@@ -1,7 +1,8 @@
-import { Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { UserControllers } from './user.controller';
 import auth from '../../middlewares/auth';
 import { UserRole } from '@prisma/client';
+import { multerUpload } from '../../config/multer.config';
 
 const router = Router();
 
@@ -21,8 +22,14 @@ router.get(
 
 router.patch(
   '/:id',
+  multerUpload.single('file'),
   auth(UserRole.USER, UserRole.ADMIN),
-  UserControllers.updateIntoDB,
+  (req: Request, res: Response, next: NextFunction) => {
+    if(req.body.data){
+      req.body = JSON.parse(req.body.data);
+    }
+    UserControllers.updateIntoDB(req, res, next);
+  },
 );
 
 router.delete(
