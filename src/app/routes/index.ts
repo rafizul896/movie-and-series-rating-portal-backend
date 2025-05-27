@@ -9,6 +9,7 @@ import commentRoutes from '../modules/comment/comment.route';
 import likeRoutes from '../modules/Like/like.route';
 import { PaymentRoutes } from '../modules/Payment/payment.route';
 import { WishlistRoutes } from '../modules/Wishlist/wishlist.route';
+import NewsletterRoutes from '../modules/Newsletter/newsLetter.route';
 
 const router = Router();
 
@@ -52,6 +53,10 @@ const moduleRoutes: { path: string; route: Router }[] = [
   {
     path: '/payment',
     route: PaymentRoutes,
+  },
+  {
+    path: '/newsletter',
+    route: NewsletterRoutes,
   },
 ];
 
