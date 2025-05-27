@@ -84,6 +84,14 @@ const getPurchasesByUser = async (email: string) => {
     where: {
       userId: userData?.id,
     },
+    include:{
+      movie: {
+        select: {
+          title: true,
+          
+        },
+      },
+    }
   });
 
   return result;

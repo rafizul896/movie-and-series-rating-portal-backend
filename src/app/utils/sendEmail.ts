@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import config from '../config';
 
-const sendEmail = async (to: string, html: string) => {
+const sendEmail = async (to: string, html: string, subject:string) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
@@ -21,7 +21,7 @@ const sendEmail = async (to: string, html: string) => {
     // add there only website name
     from: `"Movie and Series Rating & Streaming Portal" <${config.EMAIL_USER}>`,
     to,
-    subject: 'Rest Password Link',
+    subject,
     html,
   });
 };
