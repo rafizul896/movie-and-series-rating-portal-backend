@@ -25,7 +25,7 @@ const createPurchase = async (payload: any) => {
     data: payload,
   });
 
-  await createWatchlistFromPurchase(payload?.userId,payload.movieId )
+  await createWatchlistFromPurchase(payload?.userId, payload.movieId);
 
   return result;
 };
@@ -97,68 +97,69 @@ const getPurchasesByUser = async (email: string) => {
   return result;
 };
 
-const getPurchasesHistory = async (params: any,
-  options: IPaginationOptions) => {
+const getPurchasesHistory = async (
+  params: any,
+  options: IPaginationOptions,
+) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { ...filterData } = params;
 
-    const { page, limit, skip } = paginationHelper.calculatePagination(options);
-    const { ...filterData } = params;
-  
-    const andConditions: Prisma.PurchaseWhereInput[] = [];
-    // Filter by purchase_type and paymentStatus
-    if (Object.keys(filterData).length > 0) {
-      andConditions.push({
-        AND: Object.keys(filterData).map((key) => {
-          return {
-            [key]: {
-              equals: filterData[key]
-            },
-          };
-        }),
-      });
-    }
-  
-    const whereConditions: Prisma.PurchaseWhereInput = { AND: andConditions };
-  
-    const result = await prisma.purchase.findMany({
-      where: whereConditions,
-      select: {
-        id: true,
-        purchase_type: true,
-        transactionId: true,
-        amount: true,
-        paymentStatus: true,
-        accessExpiryTime: true,
-        movie: {
-          select:{
-            title: true,
-          }
-        },
-        users: {
-          select:{
-            name: true,
-          }
-        },
+  const andConditions: Prisma.PurchaseWhereInput[] = [];
+  // Filter by purchase_type and paymentStatus
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => {
+        return {
+          [key]: {
+            equals: filterData[key],
+          },
+        };
+      }),
+    });
+  }
 
+  const whereConditions: Prisma.PurchaseWhereInput = { AND: andConditions };
+
+  const result = await prisma.purchase.findMany({
+    where: whereConditions,
+    select: {
+      id: true,
+      purchase_type: true,
+      transactionId: true,
+      amount: true,
+      paymentStatus: true,
+      accessExpiryTime: true,
+      movie: {
+        select: {
+          title: true,
+        },
       },
-      skip,
-      take: limit,
-      orderBy: options.sortBy && options.sortOrder
-      ? { [options.sortBy]: options.sortOrder }
-      : { createdAt: 'desc' },
-    });
-  
-    const total = await prisma.purchase.count({
-      where: whereConditions,
-    });
-  
-    return {
-      meta: {
-        page,
-        limit,
-        total,
+      users: {
+        select: {
+          name: true,
+        },
       },
-      data: result,
-    };
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: 'desc' },
+  });
+
+  const total = await prisma.purchase.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const updatePurchase = async (id: string, payload: any) => {
@@ -181,7 +182,6 @@ const deletePurchase = async (id: string) => {
 
   return result;
 };
-
 
 const getPurchaseAnalytics = async () => {
   const [totalPurchases, totalRevenueAgg, rentalCount, buyCount] =
@@ -329,5 +329,5 @@ export const PurchaseServices = {
   deletePurchase,
   getPurchaseAnalytics,
   getMovieWiseSales,
-  getPurchasesHistory
+  getPurchasesHistory,
 };
