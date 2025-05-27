@@ -105,6 +105,7 @@ const changePassword = async (user: JwtPayload, payload: any) => {
     payload.newPassword,
     Number(config.BCRYPT_SALt_ROUNDS),
   );
+  
 
   await prisma.user.update({
     where: {
