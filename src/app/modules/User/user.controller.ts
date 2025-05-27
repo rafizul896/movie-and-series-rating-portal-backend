@@ -21,7 +21,7 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const getAllUsersFromDB = catchAsync(async (req, res) => {
-      const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
   const result = await UserService.getAllUsersFromDB(options);
 
   sendResponse(res, {
@@ -56,9 +56,7 @@ const getUserByIdFromDB = catchAsync(async (req, res) => {
 // });
 
 const updateIntoDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const payload = req.body;
-  const result = await UserService.updateIntoDB(id, payload);
+  const result = await UserService.updateIntoDB(req);
 
   sendResponse(res, {
     statusCode: status.OK,
